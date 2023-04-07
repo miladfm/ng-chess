@@ -5,7 +5,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": ["build", "lint"]
       }
     }
   },
@@ -13,12 +13,6 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
-    },
-    "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
-    },
-    "e2e": {
-      "inputs": ["default", "^production"]
     },
     "lint": {
       "inputs": [
@@ -32,9 +26,6 @@
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
-      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
-      "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/.eslintrc.json"
     ],
     "sharedGlobals": []
@@ -42,13 +33,10 @@
   "generators": {
     "@nrwl/angular:application": {
       "style": "scss",
-      "linter": "eslint",
-      "unitTestRunner": "jest",
-      "e2eTestRunner": "cypress"
+      "linter": "eslint"
     },
     "@nrwl/angular:library": {
-      "linter": "eslint",
-      "unitTestRunner": "jest"
+      "linter": "eslint"
     },
     "@nrwl/angular:component": {
       "style": "scss"

@@ -71,20 +71,6 @@
         "lintFilePatterns": ["./src/**/*.ts", "./src/**/*.html"]
       }
     },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectName}"],
-      "options": {
-        "jestConfig": "jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
-    },
     "serve-static": {
       "executor": "@nrwl/web:file-server",
       "options": {
