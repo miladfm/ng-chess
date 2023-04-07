@@ -7,5 +7,5 @@ import { appRoutes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {
-  providers: [provideRouter(appRoutes, withEnabledBlockingInitialNavigation())],
+  providers: [provideRouter(appRoutes)],
 }).catch((err) => console.error(err));

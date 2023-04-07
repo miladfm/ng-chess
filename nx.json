@@ -15,28 +15,24 @@
       "inputs": ["production", "^production"]
     },
     "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/.eslintignore"
-      ]
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"]
     }
   },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "production": [
-      "default",
-      "!{projectRoot}/.eslintrc.json"
-    ],
+    "production": ["default", "!{projectRoot}/.eslintrc.json"],
     "sharedGlobals": []
   },
   "generators": {
     "@nrwl/angular:application": {
       "style": "scss",
-      "linter": "eslint"
+      "linter": "eslint",
+      "unitTestRunner": "none",
+      "e2eTestRunner": "none"
     },
     "@nrwl/angular:library": {
-      "linter": "eslint"
+      "linter": "eslint",
+      "unitTestRunner": "none"
     },
     "@nrwl/angular:component": {
       "style": "scss"

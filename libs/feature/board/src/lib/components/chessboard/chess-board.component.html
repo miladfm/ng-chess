@@ -1,0 +1,36 @@
+<div class='board' [ngStyle]="{ '--square-length': squareLength }">
+
+  <div class='labels--top'>
+    <div *chessLettersLabel='squareLength; let letter = letter'>{{letter}}</div>
+  </div>
+  <div class='labels--right'>
+    <div *chessNumberLabel='squareLength; let index = index'>{{index}}</div>
+  </div>
+  <div class='labels--bottom'>
+    <div *chessLettersLabel='squareLength; let letter = letter'>{{letter}}</div>
+  </div>
+  <div class='labels--left'>
+    <div *chessNumberLabel='squareLength; let index = index'>{{index}}</div>
+  </div>
+
+  <div class='corner--top-left'>
+    <div class='corner-background'></div>
+  </div>
+  <div class='corner--top-right'>
+    <div class='corner-background'></div>
+  </div>
+  <div class='corner--bottom-left'>
+    <div class='corner-background'></div>
+  </div>
+  <div class='corner--bottom-right'>
+    <div class='corner-background'></div>
+  </div>
+
+  <div
+    *chessSquares='squareLength; let row = row; let col = col; let isDarkSquare = isDarkSquare'
+    class="square"
+    [class.square--white]='!isDarkSquare'
+    [class.square--black]='isDarkSquare'>
+    {{row}} - {{col}}
+  </div>
+</div>

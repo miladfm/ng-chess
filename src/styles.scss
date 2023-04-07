@@ -1,1 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body {
+  margin: 56px;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --board-black-color: #999999;
+  --board-white-color: #FFFFFF;
+  --board-border-color: #333333;
+  --board-border-size: 8px;
+}
