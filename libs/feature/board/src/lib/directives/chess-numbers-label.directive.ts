@@ -15,7 +15,7 @@ export class ChessNumbersLabelDirective {
     for (let index = 0; index < length; index++) {
       const context = {
         $implicit: index,
-        index: index + 1
+        index: length - index
       };
       this.viewContainerRef.createEmbeddedView(this.templateRef, context);
     }

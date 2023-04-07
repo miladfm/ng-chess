@@ -27,10 +27,10 @@
   </div>
 
   <div
-    *chessSquares='squareLength; let row = row; let col = col; let isDarkSquare = isDarkSquare'
+    *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'
     class="square"
     [class.square--white]='!isDarkSquare'
     [class.square--black]='isDarkSquare'>
-    {{row}} - {{col}}
+    {{label}}
   </div>
 </div>

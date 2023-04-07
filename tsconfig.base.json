@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@chess/board": ["libs/feature/board/src/index.ts"],
-      "@chess/core": ["libs/feature/core/src/index.ts"]
+      "@chess/core": ["libs/feature/core/src/index.ts"],
+      "@chess/utils": ["libs/utils/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
