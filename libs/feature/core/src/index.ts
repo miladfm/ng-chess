@@ -1,1 +1,2 @@
-export * from './lib/feature-core.component';
+export * from './lib/pawn';
+export * from './lib/types';
