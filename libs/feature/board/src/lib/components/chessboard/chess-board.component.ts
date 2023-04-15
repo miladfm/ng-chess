@@ -35,6 +35,10 @@ export class ChessBoardComponent {
   constructor() {
     this.configService.setSquareLength(this.squareLength);
 
+    this.boardService.put(Player.White, Piece.Knight, 'b1');
+    this.boardService.put(Player.White, Piece.Knight, 'g1');
+    this.boardService.put(Player.White, Piece.King, 'd1');
+    this.boardService.put(Player.White, Piece.Queen, 'e1');
     this.boardService.put(Player.White, Piece.Rook, 'a1');
     this.boardService.put(Player.White, Piece.Rook, 'h1');
     this.boardService.put(Player.White, Piece.Bishop, 'c1');
@@ -48,6 +52,10 @@ export class ChessBoardComponent {
     this.boardService.put(Player.White, Piece.Pawn, 'g2');
     this.boardService.put(Player.White, Piece.Pawn, 'h2');
 
+    this.boardService.put(Player.Black, Piece.Knight, 'b8');
+    this.boardService.put(Player.Black, Piece.Knight, 'g8');
+    this.boardService.put(Player.Black, Piece.King, 'd8');
+    this.boardService.put(Player.Black, Piece.Queen, 'e8');
     this.boardService.put(Player.Black, Piece.Rook, 'a8');
     this.boardService.put(Player.Black, Piece.Rook, 'h8');
     this.boardService.put(Player.Black, Piece.Bishop, 'f8');

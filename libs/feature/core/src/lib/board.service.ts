@@ -4,6 +4,9 @@ import { objLoop } from '@chess/utils';
 import { ConfigService } from './config.service';
 import { Bishop } from './bishop';
 import { Rock } from './rock';
+import { Queen } from './queen';
+import { King } from './king';
+import { Knight } from './knight';
 
 @Injectable({providedIn: 'root'})
 export class BoardService {
@@ -23,6 +26,18 @@ export class BoardService {
 
       case Piece.Rook:
         this.store.put(position, new Rock(player, position));
+        break;
+
+      case Piece.King:
+        this.store.put(position, new King(player, position));
+        break;
+
+      case Piece.Queen:
+        this.store.put(position, new Queen(player, position));
+        break;
+
+      case Piece.Knight:
+        this.store.put(position, new Knight(player, position));
         break;
     }
 

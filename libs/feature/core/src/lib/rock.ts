@@ -11,7 +11,7 @@ export class Rock extends PieceBase {
   private config = inject(ConfigService);
 
 
-  private straightDirections: [number, number][] = [
+  private directions: [number, number][] = [
     [1, 0], // Top
     [0, 1], // Right
     [-1, 0], // Bottom
@@ -24,7 +24,7 @@ export class Rock extends PieceBase {
     this.possibleAttackMovements = [];
 
     // Iterate through each direction
-    for (const [rowDir, colDir] of this.straightDirections) {
+    for (const [rowDir, colDir] of this.directions) {
 
       let newRow = this.row + rowDir;
       let newCol = increaseLetter(this.col, colDir);
