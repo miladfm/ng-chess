@@ -3,6 +3,7 @@ import { Pawn, Piece, Player, Position, StoreService } from '@chess/core';
 import { objLoop } from '@chess/utils';
 import { ConfigService } from './config.service';
 import { Bishop } from './bishop';
+import { Rock } from './rock';
 
 @Injectable({providedIn: 'root'})
 export class BoardService {
@@ -18,6 +19,10 @@ export class BoardService {
 
       case Piece.Bishop:
         this.store.put(position, new Bishop(player, position));
+        break;
+
+      case Piece.Rook:
+        this.store.put(position, new Rock(player, position));
         break;
     }
 

@@ -12,7 +12,11 @@
   [class.piece--player-white]='(player$ | async) === Player.White'
   [class.piece--player-black]='(player$ | async) === Player.Black'
   viewBox='0 0 45 45'>
+
+  <!-- Pawn -->
   <path *ngSwitchCase='Piece.Pawn' d="m 22.5,9 c -2.21,0 -4,1.79 -4,4 0,0.89 0.29,1.71 0.78,2.38 C 17.33,16.5 16,18.59 16,21 c 0,2.03 0.94,3.84 2.41,5.03 C 15.41,27.09 11,31.58 11,39.5 H 34 C 34,31.58 29.59,27.09 26.59,26.03 28.06,24.84 29,23.03 29,21 29,18.59 27.67,16.5 25.72,15.38 26.21,14.71 26.5,13.89 26.5,13 c 0,-2.21 -1.79,-4 -4,-4 z"/>
+
+  <!-- Bishop -->
   <g *ngSwitchCase='Piece.Bishop'>
     <g>
       <path d="M 9,36 C 12.39,35.03 19.11,36.43 22.5,34 C 25.89,36.43 32.61,35.03 36,36 C 36,36 37.65,36.54 39,38 C 38.32,38.97 37.35,38.99 36,38.5 C 32.61,37.53 25.89,38.96 22.5,37.5 C 19.11,38.96 12.39,37.53 9,38.5 C 7.65,38.99 6.68,38.97 6,38 C 7.35,36.54 9,36 9,36 z"/>
@@ -21,6 +25,22 @@
     </g>
     <path class='piece--negative-color' d="M 17.5,26 L 27.5,26 M 15,30 L 30,30 M 22.5,15.5 L 22.5,20.5 M 20,18 L 25,18"/>
   </g>
+
+  <!-- Rock -->
+  <g *ngSwitchCase='Piece.Rook'>
+    <path d="M 9,39 L 36,39 L 36,36 L 9,36 L 9,39 z "/>
+    <path d="M 12.5,32 L 14,29.5 L 31,29.5 L 32.5,32 L 12.5,32 z "/>
+    <path d="M 12,36 L 12,32 L 33,32 L 33,36 L 12,36 z "/>
+    <path d="M 14,29.5 L 14,16.5 L 31,16.5 L 31,29.5 L 14,29.5 z "/>
+    <path d="M 14,16.5 L 11,14 L 34,14 L 31,16.5 L 14,16.5 z "/>
+    <path d="M 11,14 L 11,9 L 15,9 L 15,11 L 20,11 L 20,9 L 25,9 L 25,11 L 30,11 L 30,9 L 34,9 L 34,14 L 11,14 z "/>
+    <path d="M 12,35.5 L 33,35.5 L 33,35.5" class='piece--negative-color' style="stroke-width:1;"/>
+    <path d="M 13,31.5 L 32,31.5" class='piece--negative-color' style="stroke-width:1;"/>
+    <path d="M 14,29.5 L 31,29.5" class='piece--negative-color' style="stroke-width:1;"/>
+    <path d="M 14,16.5 L 31,16.5" class='piece--negative-color' style="stroke-width:1;"/>
+    <path d="M 11,14 L 34,14" class='piece--negative-color' style="stroke-width:1;"/>
+  </g>
+
 
   <ng-template class="example-custom-placeholder" cdkDragPlaceholder></ng-template>
 </svg>

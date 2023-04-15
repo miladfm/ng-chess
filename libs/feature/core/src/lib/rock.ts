@@ -4,18 +4,18 @@ import { increaseLetter } from '@chess/utils';
 import { inject } from '@angular/core';
 import { ConfigService } from './config.service';
 
-export class Bishop extends PieceBase {
+export class Rock extends PieceBase {
 
-  public type = Piece.Bishop;
+  public type = Piece.Rook;
 
   private config = inject(ConfigService);
 
 
-  private diagonalDirections: [number, number][] = [
-    [1, 1], // Top-Right
-    [-1, 1], // Top-Left
-    [1, -1], // Bottom-Right
-    [-1, -1], // Bottom-Left
+  private straightDirections: [number, number][] = [
+    [1, 0], // Top
+    [0, 1], // Right
+    [-1, 0], // Bottom
+    [0, -1], // Left
   ];
 
 
@@ -24,7 +24,7 @@ export class Bishop extends PieceBase {
     this.possibleAttackMovements = [];
 
     // Iterate through each direction
-    for (const [rowDir, colDir] of this.diagonalDirections) {
+    for (const [rowDir, colDir] of this.straightDirections) {
 
       let newRow = this.row + rowDir;
       let newCol = increaseLetter(this.col, colDir);
