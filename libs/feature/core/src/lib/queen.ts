@@ -1,14 +1,9 @@
 import { PieceBase } from './piece.base';
 import { Piece, Position } from '@chess/core';
-import { increaseLetter } from '@chess/utils';
-import { inject } from '@angular/core';
-import { ConfigService } from './config.service';
 
 export class Queen extends PieceBase {
 
   public type = Piece.Queen;
-
-  private config = inject(ConfigService);
 
   private directions: [number, number][] = [
     [1, 1], // Top-Right
@@ -21,37 +16,11 @@ export class Queen extends PieceBase {
     [0, -1], // Left
   ];
 
+  protected override getMoveDirections(): [number, number][] {
+    return this.directions;
+  }
 
-
-  override _updatePossibleMovements(piecesPosition: Record<Position, PieceBase>) {
-    this.possibleFreeMovements = [];
-    this.possibleAttackMovements = [];
-
-    // Iterate through each direction
-    for (const [rowDir, colDir] of this.directions) {
-
-      let newRow = this.row + rowDir;
-      let newCol = increaseLetter(this.col, colDir);
-
-      // Keep moving in direction until reaching edge, blocked or attack
-      while (this.store._isSquareValid(`${newCol}${newRow}`)) {
-        const newSquare: Position = `${newCol}${newRow}`;
-
-        if (!this.store._isSquareFree(newSquare)) {
-          // Square is occupied by opponent piece
-          if (piecesPosition[newSquare]._player !== this._player) {
-            this.possibleAttackMovements.push(newSquare);
-          }
-          break;
-        }
-
-        // Square is empty and valid for free movement
-        this.possibleFreeMovements.push(newSquare);
-
-        // Move to next square in the direction
-        newRow += rowDir;
-        newCol = increaseLetter(newCol, colDir);
-      }
-    }
+  protected override shouldContinueCheckSquare(square: Position, loopIndex: number): boolean {
+    return this.store._isSquareValid(square);
   }
 }

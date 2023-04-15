@@ -53,8 +53,8 @@ export class StoreService {
 
   public selectSquare(square: Position | null) {
     this._selectedSquare = square;
-    this._attackMovementSquare = this._piecesPosition[this._selectedSquare]?.possibleAttackMovements ?? [];
-    this._freeMovementSquare = this._piecesPosition[this._selectedSquare]?.possibleFreeMovements ?? [];
+    this._attackMovementSquare = this._piecesPosition[this._selectedSquare]?._possibleAttackMovements ?? [];
+    this._freeMovementSquare = this._piecesPosition[this._selectedSquare]?._possibleFreeMovements ?? [];
 
     this.selectedSquareSubject$.next(this._selectedSquare);
     this.attackMovementSquareSubject$.next(this._attackMovementSquare);

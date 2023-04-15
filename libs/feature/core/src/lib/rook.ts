@@ -1,19 +1,15 @@
 import { PieceBase } from './piece.base';
 import { Piece, Position } from '@chess/core';
 
-export class Knight extends PieceBase {
+export class Rook extends PieceBase {
 
-  public type = Piece.Knight;
+  public type = Piece.Rook;
 
-  protected directions: [number, number][] = [
-    [2, 1],
-    [1, 2],
-    [-1, 2],
-    [-2, 1],
-    [-2, -1],
-    [-1, -2],
-    [1, -2],
-    [2, -1],
+  private directions: [number, number][] = [
+    [1, 0], // Top
+    [0, 1], // Right
+    [-1, 0], // Bottom
+    [0, -1], // Left
   ];
 
   protected override getMoveDirections(): [number, number][] {
@@ -21,6 +17,6 @@ export class Knight extends PieceBase {
   }
 
   protected override shouldContinueCheckSquare(square: Position, loopIndex: number): boolean {
-    return loopIndex <= 1;
+    return this.store._isSquareValid(square);
   }
 }

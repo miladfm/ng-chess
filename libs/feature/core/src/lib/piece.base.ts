@@ -1,6 +1,7 @@
 import { MovementDirection, Piece, Player, Position, StoreService } from '@chess/core';
 import { movementsDirectionByPlayer } from './config';
 import { inject } from '@angular/core';
+import { increaseLetter } from '@chess/utils';
 
 export abstract class PieceBase {
 
@@ -8,8 +9,8 @@ export abstract class PieceBase {
 
   abstract readonly type: Piece;
   protected readonly movementDirection: MovementDirection;
-  public possibleFreeMovements: Position[] = [];
-  public possibleAttackMovements: Position[] = []; // possibleCaptureMovements, possibleThreatMovements
+  public _possibleFreeMovements: Position[] = [];
+  public _possibleAttackMovements: Position[] = []; // possibleCaptureMovements, possibleThreatMovements
 
   protected readonly startPosition: Position;
   protected currentPosition: Position;
@@ -33,15 +34,16 @@ export abstract class PieceBase {
     this.movementDirection = movementsDirectionByPlayer[_player];
   }
 
-  public abstract _updatePossibleMovements(piecesPosition: Record<Position, PieceBase>): void;
+  protected abstract getMoveDirections(): [number, number][];
+  protected abstract shouldContinueCheckSquare(square: Position, loopIndex: number): boolean;
 
   public _move(newPosition: Position) {
     const canMove =
-      this.possibleFreeMovements.includes(newPosition) ||
-      this.possibleAttackMovements.includes(newPosition);
+      this._possibleFreeMovements.includes(newPosition) ||
+      this._possibleAttackMovements.includes(newPosition);
 
     if (!canMove) {
-      console.log(`❌ ${this._player} ${this.type}: ${this.currentPosition} -> ${newPosition}. Possible movements are ${this.possibleFreeMovements} ${this.possibleAttackMovements}`);
+      console.log(`❌ ${this._player} ${this.type}: ${this.currentPosition} -> ${newPosition}. Possible movements are ${this._possibleFreeMovements} ${this._possibleAttackMovements}`);
       return false;
     }
 
@@ -50,4 +52,35 @@ export abstract class PieceBase {
 
     return true;
   }
+
+  public _updatePossibleMovements(piecesPosition: Record<Position, PieceBase>) {
+    this._possibleFreeMovements = [];
+    this._possibleAttackMovements = [];
+
+    for (const [rowDir, colDir] of this.getMoveDirections()) {
+      let newRow = this.row + rowDir;
+      let newCol = increaseLetter(this.col, colDir);
+
+      let index = 1;
+      while (this.shouldContinueCheckSquare(`${newCol}${newRow}`, index)) {
+        const newSquare: Position = `${newCol}${newRow}`;
+
+        if (!this.store._isSquareFree(newSquare)) {
+          // Square is occupied by opponent piece
+          if (piecesPosition[newSquare]._player !== this._player) {
+            this._possibleAttackMovements.push(newSquare);
+          }
+          break;
+        }
+
+        // Square is empty and valid for free movement
+        this._possibleFreeMovements.push(newSquare);
+
+        // Move to next square in the direction
+        newRow += rowDir;
+        newCol = increaseLetter(newCol, colDir);
+        index++;
+      }
+    }
+  };
 }
