@@ -6,6 +6,7 @@ import { ChessLettersLabelDirective } from '../../directives/chess-letters-label
 import { BoardService, Piece, Player, Position, StoreService } from '@chess/core';
 import { SquareComponent } from '../square/square.component';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { ConfigService } from '../../../../../core/src/lib/config.service';
 
 @Component({
   standalone: true,
@@ -29,8 +30,13 @@ export class ChessBoardComponent {
 
   private boardService = inject(BoardService);
   private storeService = inject(StoreService);
+  private configService = inject(ConfigService);
 
   constructor() {
+    this.configService.setSquareLength(this.squareLength);
+
+    this.boardService.put(Player.White, Piece.Bishop, 'c1');
+    this.boardService.put(Player.White, Piece.Bishop, 'f1');
     this.boardService.put(Player.White, Piece.Pawn, 'a2');
     this.boardService.put(Player.White, Piece.Pawn, 'b2');
     this.boardService.put(Player.White, Piece.Pawn, 'c2');
@@ -40,6 +46,8 @@ export class ChessBoardComponent {
     this.boardService.put(Player.White, Piece.Pawn, 'g2');
     this.boardService.put(Player.White, Piece.Pawn, 'h2');
 
+    this.boardService.put(Player.Black, Piece.Bishop, 'f8');
+    this.boardService.put(Player.Black, Piece.Bishop, 'c8');
     this.boardService.put(Player.Black, Piece.Pawn, 'a7');
     this.boardService.put(Player.Black, Piece.Pawn, 'b7');
     this.boardService.put(Player.Black, Piece.Pawn, 'c7');

@@ -39,16 +39,28 @@
   width: 70%;
   height: 70%;
   z-index: 100;
+  stroke-width: 1.5;
 }
 
 .piece--player-white {
   fill: #fff;
   stroke: #000;
+
+  .piece--negative-color {
+    fill: #000;
+    stroke: #000;
+  }
 }
+
 
 .piece--player-black {
   fill: #000;
-  stroke: #fff;
+  stroke: #000;
+
+  .piece--negative-color {
+    fill: #fff;
+    stroke: #fff;
+  }
 }
 
 

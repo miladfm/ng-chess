@@ -16,8 +16,7 @@ import { filter, map, shareReplay } from 'rxjs';
     'class': "square",
     '[class.square--white]': '!isDark',
     '[class.square--black]': 'isDark',
-    '(pointerdown)': 'onSquareSelect($event)',
-    '(cdkDragDropped)': 'onDrop($event)'
+    '(pointerdown)': 'onSquareSelect($event)'
   }
 })
 export class SquareComponent {
@@ -36,7 +35,7 @@ export class SquareComponent {
 
   protected piece$ = this.store.positions$.pipe(
     map(positions => positions[this.id]),
-    map((piece) => piece ? Piece.Pawn : null),
+    map((piece) => piece?.type),
   )
 
   protected selected$ = this.store.selectedSquare$.pipe(
@@ -59,9 +58,5 @@ export class SquareComponent {
   protected onSquareSelect(event: Event) {
     event.stopPropagation();
     this.board._selectSquare(this.id);
-  }
-
-  protected onDrop(e: any) {
-    console.log(e);
   }
 }

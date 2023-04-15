@@ -11,5 +11,6 @@ export enum MovementDirection {
 }
 
 export enum Piece {
-  Pawn = 'pawn'
+  Pawn = 'pawn',
+  Bishop = 'bishop'
 }

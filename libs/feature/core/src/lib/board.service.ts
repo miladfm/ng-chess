@@ -1,13 +1,26 @@
 import { inject, Injectable } from '@angular/core';
 import { Pawn, Piece, Player, Position, StoreService } from '@chess/core';
 import { objLoop } from '@chess/utils';
+import { ConfigService } from './config.service';
+import { Bishop } from './bishop';
 
 @Injectable({providedIn: 'root'})
 export class BoardService {
 
   private store = inject(StoreService);
   public put(player: Player, piece: Piece, position: Position) {
-    this.store.put(position, new Pawn(player, position));
+
+    switch (piece) {
+
+      case Piece.Pawn:
+        this.store.put(position, new Pawn(player, position));
+        break;
+
+      case Piece.Bishop:
+        this.store.put(position, new Bishop(player, position));
+        break;
+    }
+
     this.updateMovements();
   }
 

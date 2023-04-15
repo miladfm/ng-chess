@@ -1,11 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Pawn, Piece, Player, Position } from '@chess/core';
 import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
+import { PieceBase } from './piece.base';
+import { ConfigService } from './config.service';
+import { MAX_LETTER, LETTER_START_CHAR_CODE, letterToASCII, LETTER_MAX_CHAR_CODE } from '@chess/utils';
 
 @Injectable({providedIn: 'root'})
 export class StoreService {
 
-  public _piecesPosition: Record<Position, Pawn> = {};
+  private config = inject(ConfigService);
+
+  public _piecesPosition: Record<Position, PieceBase> = {};
   public _selectedSquare: Position;
   public _attackMovementSquare: Position[] = [];
   public _freeMovementSquare: Position[] = [];
@@ -21,6 +26,20 @@ export class StoreService {
 
   private freeMovementSquareSubject$ = new BehaviorSubject<Position[]>([]);
   public freeMovementSquare$ = this.freeMovementSquareSubject$.pipe(distinctUntilChanged());
+
+  public _isSquareFree(square: Position) {
+    return !this._piecesPosition[square];
+  }
+
+  public _isSquareValid(square: Position) {
+    const colASCII = letterToASCII(square[0]);
+    const row = Number(square[1]);
+
+    const isColValid = LETTER_START_CHAR_CODE <= colASCII && colASCII <= LETTER_MAX_CHAR_CODE;
+    const isRowValid = 1 <= row && row <= this.config._squareLength;
+
+    return isColValid && isRowValid;
+  }
 
   public _resetSelection() {
     this._selectedSquare = null;
@@ -49,7 +68,7 @@ export class StoreService {
 
   }
 
-  public put(position: Position, pieceInstance: Pawn) {
+  public put(position: Position, pieceInstance: PieceBase) {
     this._piecesPosition[position] = pieceInstance;
     this.positionsSubject$.next(this._piecesPosition);
   }
