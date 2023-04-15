@@ -60,11 +60,4 @@ export class StoreService {
     this.positionsSubject$.next(this._piecesPosition);
   }
 
-  public getPieceAscii$(position: Position) {
-    return this.positionsSubject$.pipe(
-      map(piecesPosition => piecesPosition[position]?.PIECE_ASCII),
-      distinctUntilChanged()
-    )
-  }
-
 }

@@ -4,7 +4,6 @@ import { ChessSquaresDirective } from '../../directives/chess-squares.directive'
 import { ChessNumbersLabelDirective } from '../../directives/chess-numbers-label.directive';
 import { ChessLettersLabelDirective } from '../../directives/chess-letters-label.directive';
 import { BoardService, Piece, Player, Position, StoreService } from '@chess/core';
-import { PositionToAsciiPipe } from '../../pipes/position-to-ascii.pipe';
 import { SquareComponent } from '../square/square.component';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
@@ -15,7 +14,6 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
     ChessSquaresDirective,
     ChessNumbersLabelDirective,
     ChessLettersLabelDirective,
-    PositionToAsciiPipe,
     SquareComponent,
     DragDropModule
   ],

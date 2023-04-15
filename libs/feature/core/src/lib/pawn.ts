@@ -4,7 +4,6 @@ import { decreaseLetter, increaseLetter } from '@chess/utils';
 
 export class Pawn {
 
-  public readonly PIECE_ASCII = this._player === Player.White ? '♙' : '♟︎';
   private readonly movementDirection: MovementDirection;
   private currentPosition: string;
 

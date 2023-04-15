@@ -2,13 +2,12 @@ import { ChangeDetectionStrategy, Component, inject, Input, ViewEncapsulation } 
 import { CommonModule } from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { BoardService, Piece, Player, Position, StoreService } from '@chess/core';
-import { PositionToAsciiPipe } from '../../pipes/position-to-ascii.pipe';
 import { filter, map, shareReplay } from 'rxjs';
 
 @Component({
   selector: 'chess-square',
   standalone: true,
-  imports: [CommonModule, PositionToAsciiPipe, DragDropModule],
+  imports: [CommonModule, DragDropModule],
   templateUrl: './square.component.html',
   styleUrls: ['./square.component.scss'],
   encapsulation: ViewEncapsulation.Emulated,
