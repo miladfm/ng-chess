@@ -26,11 +26,18 @@
     <div class='corner-background'></div>
   </div>
 
-  <div
+  <chess-square
     *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'
-    class="square"
-    [class.square--white]='!isDarkSquare'
-    [class.square--black]='isDarkSquare'>
-    {{label}}
-  </div>
+    class='square'
+    [id]="label"
+    [isDark]="isDarkSquare">
+  </chess-square>
+
+<!--  <div-->
+<!--    *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'-->
+<!--    class="square"-->
+<!--    [class.square&#45;&#45;white]='!isDarkSquare'-->
+<!--    [class.square&#45;&#45;black]='isDarkSquare'>-->
+<!--    {{label | positionToAscii$ | async}}-->
+<!--  </div>-->
 </div>

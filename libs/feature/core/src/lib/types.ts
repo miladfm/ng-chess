@@ -9,3 +9,7 @@ export enum MovementDirection {
   Up = 1,
   Down = -1,
 }
+
+export enum Piece {
+  Pawn = 'pawn'
+}

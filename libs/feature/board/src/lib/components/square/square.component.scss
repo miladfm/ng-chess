@@ -1,0 +1,49 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+:host(.square--white) {
+  background-color: var(--board-white-color);
+}
+
+:host(.square--black) {
+  background-color: var(--board-black-color);
+  color: #fff;
+}
+
+.border {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.border--selected {
+  border: 5px solid blue;
+}
+
+.border--attack-movement {
+  border: 5px solid red;
+}
+
+.border--free-movement {
+  border: 5px solid green;
+}
+
+
+.piece {
+  width: 70%;
+  height: 70%;
+}
+
+.piece--player-white {
+  fill: #fff;
+  stroke: #000;
+}
+
+.piece--player-black {
+  fill: #000;
+  stroke: #fff;
+}
