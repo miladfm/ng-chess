@@ -18,6 +18,8 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  touch-action: none;
+  pointer-events: none;
 }
 
 .border--selected {
@@ -36,6 +38,7 @@
 .piece {
   width: 70%;
   height: 70%;
+  z-index: 100;
 }
 
 .piece--player-white {
@@ -47,3 +50,6 @@
   fill: #000;
   stroke: #fff;
 }
+
+
+

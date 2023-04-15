@@ -1,4 +1,7 @@
-<div class='board' [ngStyle]="{ '--square-length': squareLength }">
+<div
+  cdkDropListGroup
+  class='board'
+  [ngStyle]="{ '--square-length': squareLength }">
 
   <div class='labels--top'>
     <div *chessLettersLabel='squareLength; let letter = letter'>{{letter}}</div>
@@ -28,16 +31,13 @@
 
   <chess-square
     *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'
+    cdkDropList
+    [cdkDropListSortingDisabled]='true'
+    [cdkDropListData]='label'
+    (cdkDropListDropped)='onDrop($event)'
     class='square'
     [id]="label"
     [isDark]="isDarkSquare">
   </chess-square>
 
-<!--  <div-->
-<!--    *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'-->
-<!--    class="square"-->
-<!--    [class.square&#45;&#45;white]='!isDarkSquare'-->
-<!--    [class.square&#45;&#45;black]='isDarkSquare'>-->
-<!--    {{label | positionToAscii$ | async}}-->
-<!--  </div>-->
 </div>

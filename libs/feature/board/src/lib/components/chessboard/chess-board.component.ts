@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ChessSquaresDirective } from '../../directives/chess-squares.directive';
 import { ChessNumbersLabelDirective } from '../../directives/chess-numbers-label.directive';
 import { ChessLettersLabelDirective } from '../../directives/chess-letters-label.directive';
-import { BoardService, Piece, Player, StoreService } from '@chess/core';
+import { BoardService, Piece, Player, Position, StoreService } from '@chess/core';
 import { PositionToAsciiPipe } from '../../pipes/position-to-ascii.pipe';
 import { SquareComponent } from '../square/square.component';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   standalone: true,
@@ -16,6 +17,7 @@ import { SquareComponent } from '../square/square.component';
     ChessLettersLabelDirective,
     PositionToAsciiPipe,
     SquareComponent,
+    DragDropModule
   ],
   selector: "chess-board",
   templateUrl: "./chess-board.component.html",
@@ -56,5 +58,10 @@ export class ChessBoardComponent {
     // setTimeout(() => this.boardService.move('b5', 'b3'), 4000)
     // setTimeout(() => this.boardService.move('b5', 'b4'), 5000)
 
+  }
+
+  onDrop(e: CdkDragDrop<Position>) {
+    this.boardService._resetSelection();
+    this.boardService.move(e.previousContainer.data, e.container.data);
   }
 }

@@ -15,3 +15,16 @@ html, body {
   --board-border-color: #333333;
   --board-border-size: 8px;
 }
+
+
+.cdk-drag-placeholder {
+  position: absolute;
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  //transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-preview {
+}

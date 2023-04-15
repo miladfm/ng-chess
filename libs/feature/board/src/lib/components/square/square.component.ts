@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, Input, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 import { BoardService, Piece, Player, Position, StoreService } from '@chess/core';
 import { PositionToAsciiPipe } from '../../pipes/position-to-ascii.pipe';
 import { filter, map, shareReplay } from 'rxjs';
@@ -7,7 +8,7 @@ import { filter, map, shareReplay } from 'rxjs';
 @Component({
   selector: 'chess-square',
   standalone: true,
-  imports: [CommonModule, PositionToAsciiPipe],
+  imports: [CommonModule, PositionToAsciiPipe, DragDropModule],
   templateUrl: './square.component.html',
   styleUrls: ['./square.component.scss'],
   encapsulation: ViewEncapsulation.Emulated,
@@ -16,7 +17,8 @@ import { filter, map, shareReplay } from 'rxjs';
     'class': "square",
     '[class.square--white]': '!isDark',
     '[class.square--black]': 'isDark',
-    '(click)': 'onSquareClick($event)'
+    '(pointerdown)': 'onSquareSelect($event)',
+    '(cdkDragDropped)': 'onDrop($event)'
   }
 })
 export class SquareComponent {
@@ -55,8 +57,12 @@ export class SquareComponent {
   protected readonly Piece = Piece;
 
 
-  protected onSquareClick(event: Event) {
+  protected onSquareSelect(event: Event) {
     event.stopPropagation();
     this.board._selectSquare(this.id);
+  }
+
+  protected onDrop(e: any) {
+    console.log(e);
   }
 }

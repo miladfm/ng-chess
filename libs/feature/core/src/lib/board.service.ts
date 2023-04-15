@@ -23,6 +23,10 @@ export class BoardService {
     this.updateMovements();
   }
 
+  public _resetSelection() {
+    this.store._resetSelection();
+  }
+
   public _selectSquare(square: Position | null) {
     if (this.store._selectedSquare === square) {
       this.store._resetSelection();
