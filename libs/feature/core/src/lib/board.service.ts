@@ -23,6 +23,17 @@ const PIECE_CLASS_REF: Record<Piece, any> = {
 export class BoardService {
 
   private store = inject(StoreService);
+
+  public isKingInCheck(player: Player): boolean {
+
+    const opponentPieces = this.store._getPlayerPieces(player === Player.White ? Player.Black : Player.White);
+    const playerKing =
+      objLoop(this.store._piecesPosition)
+        .find((_, piece) => piece?.type === Piece.King);
+
+
+    return opponentPieces.some(piece => piece._possibleAttackMovements.includes(playerKing._currentPosition))
+  }
   public put(player: Player, piece: Piece, position: Position) {
 
     this.store.put(position, new PIECE_CLASS_REF[piece](player, position))
@@ -39,6 +50,8 @@ export class BoardService {
 
     this.store.replace(start, end);
     this.updateMovements();
+    console.log('White Check', this.isKingInCheck(Player.White));
+    console.log('Black Check', this.isKingInCheck(Player.Black));
   }
 
   public _resetSelection() {

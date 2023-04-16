@@ -1,4 +1,4 @@
-import { Piece, Player, Position } from './types';
+import { Piece, Position } from './types';
 import { PieceBase } from './piece.base';
 import { increaseLetter } from '@chess/utils';
 

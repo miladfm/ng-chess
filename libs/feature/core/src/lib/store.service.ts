@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { Pawn, Piece, Player, Position } from '@chess/core';
+import { Player, Position } from '@chess/core';
 import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 import { PieceBase } from './piece.base';
 import { ConfigService } from './config.service';
-import { MAX_LETTER, LETTER_START_CHAR_CODE, letterToASCII, LETTER_MAX_CHAR_CODE } from '@chess/utils';
+import { LETTER_START_CHAR_CODE, letterToASCII, LETTER_MAX_CHAR_CODE, objLoop } from '@chess/utils';
 
 @Injectable({providedIn: 'root'})
 export class StoreService {
@@ -26,6 +26,12 @@ export class StoreService {
 
   private freeMovementSquareSubject$ = new BehaviorSubject<Position[]>([]);
   public freeMovementSquare$ = this.freeMovementSquareSubject$.pipe(distinctUntilChanged());
+
+
+  public _getPlayerPieces(player: Player) {
+    return objLoop(this._piecesPosition)
+        .filter((square, piece) => piece?._player === player);
+  }
 
   public _isSquareFree(square: Position) {
     return !this._piecesPosition[square];

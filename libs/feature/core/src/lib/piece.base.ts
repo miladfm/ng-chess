@@ -13,24 +13,24 @@ export abstract class PieceBase {
   public _possibleAttackMovements: Position[] = []; // possibleCaptureMovements, possibleThreatMovements
 
   protected readonly startPosition: Position;
-  protected currentPosition: Position;
+  public _currentPosition: Position;
   public _player: Player;
   protected get isAtStartPosition() {
-    return this.startPosition === this.currentPosition;
+    return this.startPosition === this._currentPosition;
   }
 
   protected get row(): number {
-    return Number(this.currentPosition[1]);
+    return Number(this._currentPosition[1]);
   }
 
   protected get col() {
-    return this.currentPosition[0];
+    return this._currentPosition[0];
   }
 
   constructor(_player: Player, startPosition: Position) {
     this._player = _player;
     this.startPosition = startPosition;
-    this.currentPosition = startPosition;
+    this._currentPosition = startPosition;
     this.movementDirection = movementsDirectionByPlayer[_player];
   }
 
@@ -43,12 +43,12 @@ export abstract class PieceBase {
       this._possibleAttackMovements.includes(newPosition);
 
     if (!canMove) {
-      console.log(`❌ ${this._player} ${this.type}: ${this.currentPosition} -> ${newPosition}. Possible movements are ${this._possibleFreeMovements} ${this._possibleAttackMovements}`);
+      console.log(`❌ ${this._player} ${this.type}: ${this._currentPosition} -> ${newPosition}. Possible movements are ${this._possibleFreeMovements} ${this._possibleAttackMovements}`);
       return false;
     }
 
-    console.log(`✅ ${this._player} ${this.type}: ${this.currentPosition} -> ${newPosition}`);
-    this.currentPosition = newPosition;
+    console.log(`✅ ${this._player} ${this.type}: ${this._currentPosition} -> ${newPosition}`);
+    this._currentPosition = newPosition;
 
     return true;
   }
