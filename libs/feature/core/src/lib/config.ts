@@ -1,8 +1,8 @@
-import { MovementDirection, Player } from './types';
+import { MovementDirection, PieceColor } from './types';
 
-export const startingPlayer = Player.White as Player;
+export const startingPlayer = PieceColor.White as PieceColor;
 
 export const movementsDirectionByPlayer = {
-  [Player.White]: startingPlayer === Player.White ? MovementDirection.Up : MovementDirection.Down,
-  [Player.Black]: startingPlayer === Player.White ? MovementDirection.Down : MovementDirection.Up,
+  [PieceColor.White]: startingPlayer === PieceColor.White ? MovementDirection.Up : MovementDirection.Down,
+  [PieceColor.Black]: startingPlayer === PieceColor.White ? MovementDirection.Down : MovementDirection.Up,
 }

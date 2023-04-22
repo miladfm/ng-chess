@@ -1,47 +1,34 @@
 import { inject, Injectable } from '@angular/core';
 import { objLoop } from '@chess/utils';
-import { Bishop } from './bishop';
-import { Rook } from './rook';
-import { Queen } from './queen';
-import { King } from './king';
-import { Knight } from './knight';
-import { Pawn } from './pawn';
-import { Piece, Player, Position } from './types';
+import { PieceType, PieceColor, SquareId } from './types';
 import { StoreService } from './store.service';
+import { Piece } from './piece';
 
 
-const PIECE_CLASS_REF: Record<Piece, any> = {
-  [Piece.Pawn]: Pawn,
-  [Piece.Bishop]: Bishop,
-  [Piece.Rook]: Rook,
-  [Piece.Queen]: Queen,
-  [Piece.King]: King,
-  [Piece.Knight]: Knight,
-}
 
 @Injectable({providedIn: 'root'})
 export class BoardService {
 
   private store = inject(StoreService);
 
-  public isKingInCheck(player: Player): boolean {
+  public isKingInCheck(player: PieceColor): boolean {
 
-    const opponentPieces = this.store._getPlayerPieces(player === Player.White ? Player.Black : Player.White);
+    const opponentPieces = this.store._getPlayerPieces(player === PieceColor.White ? PieceColor.Black : PieceColor.White);
     const playerKing =
       objLoop(this.store._piecesPosition)
-        .find((_, piece) => piece?.type === Piece.King);
+        .find((_, piece) => piece?.type === PieceType.King);
 
 
-    return opponentPieces.some(piece => piece._possibleAttackMovements.includes(playerKing._currentPosition))
+    return playerKing && opponentPieces.some(piece => piece.attackMovements.includes(playerKing.startSquareId))
   }
-  public put(player: Player, piece: Piece, position: Position) {
+  public put(color: PieceColor, type: PieceType, startSquareId: SquareId) {
 
-    this.store.put(position, new PIECE_CLASS_REF[piece](player, position))
+    this.store.put(startSquareId, new Piece(type, color, startSquareId))
     this.updateMovements();
   }
 
 
-  public move(start: Position, end: Position) {
+  public move(start: SquareId, end: SquareId) {
     const isMoveSuccess = this.store._piecesPosition[start]?._move(end);
 
     if (!isMoveSuccess) {
@@ -50,15 +37,15 @@ export class BoardService {
 
     this.store.replace(start, end);
     this.updateMovements();
-    console.log('White Check', this.isKingInCheck(Player.White));
-    console.log('Black Check', this.isKingInCheck(Player.Black));
+    // console.log('White Check', this.isKingInCheck(Player.White));
+    // console.log('Black Check', this.isKingInCheck(Player.Black));
   }
 
   public _resetSelection() {
     this.store._resetSelection();
   }
 
-  public _selectSquare(square: Position | null) {
+  public _selectSquare(square: SquareId | null) {
     if (this.store._selectedSquare === square) {
       this.store._resetSelection();
       return;

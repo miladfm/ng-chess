@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, Input, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { BoardService, Piece, Player, Position, StoreService } from '@chess/core';
+import { BoardService, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
 import { filter, map, shareReplay } from 'rxjs';
 
 @Component({
@@ -22,13 +22,13 @@ import { filter, map, shareReplay } from 'rxjs';
 export class SquareComponent {
 
   @Input() isDark: boolean;
-  @Input() id: Position;
+  @Input() id: SquareId;
 
   protected store = inject(StoreService);
   protected board = inject(BoardService);
 
   protected player$ = this.store.positions$.pipe(
-    map(positions => positions[this.id]?._player),
+    map(positions => positions[this.id]?.color),
     filter((player) => !!player),
     shareReplay()
   )
@@ -51,8 +51,8 @@ export class SquareComponent {
   )
 
 
-  protected readonly Player = Player;
-  protected readonly Piece = Piece;
+  protected readonly Player = PieceColor;
+  protected readonly Piece = PieceType;
 
 
   protected onSquareSelect(event: Event) {
