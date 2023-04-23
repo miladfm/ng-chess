@@ -1,16 +1,16 @@
 <div
   class='border'
-  [class.border--selected]='selected$ | async'
-  [class.border--attack-movement]='attackMovement$ | async'
-  [class.border--free-movement]='freeMovement$ | async'>
+  [class.border--selected]='isSelected | async'
+  [class.border--attack-movement]='isAttackMove$ | async'
+  [class.border--free-movement]='isFreeMove$ | async'>
 </div>
 
 <svg
   cdkDrag
-  [ngSwitch]='piece$ | async'
+  [ngSwitch]='pieceType$ | async'
   class='piece'
-  [class.piece--player-white]='(player$ | async) === Player.White'
-  [class.piece--player-black]='(player$ | async) === Player.Black'
+  [class.piece--player-white]='(pieceColor$ | async) === Player.White'
+  [class.piece--player-black]='(pieceColor$ | async) === Player.Black'
   viewBox='0 0 45 45'>
 
   <!-- Pawn -->

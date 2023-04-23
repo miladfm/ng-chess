@@ -5,38 +5,11 @@ export function objLoop<TKey extends string, TValue>(obj: Record<TKey, TValue>) 
         callBack(propName, obj[propName]);
       }
     },
-    map: <TNewValue = unknown>(callBack: (key: TKey, value: TValue) => TNewValue) => {
-      const result: TNewValue[] = [];
+    map: <TNewValue = unknown>(callBack: (key: TKey, value: TValue) => TNewValue): Record<TKey, TNewValue> => {
+      const result = {} as Record<TKey, TNewValue>;
 
       for (const propName in obj) {
-        result.push(callBack(propName, obj[propName]));
-      }
-
-      return result;
-    },
-    filter: (callBack: (key: TKey, value: TValue) => boolean) => {
-      const result: TValue[] = [];
-
-      for (const propName in obj) {
-        if(callBack(propName, obj[propName])) {
-          result.push(obj[propName]);
-        }
-      }
-
-      return result;
-    },
-    /*
-     * If return value of callback is null, the item will be filtered.
-     * Otherwise the value of return callback will be push to result list
-     * */
-    filterMap: <TNewValue = unknown>(callBack: (key: TKey, value: TValue) => null | TNewValue) => {
-      const result: TNewValue[] = [];
-
-      for (const propName in obj) {
-        const callBackResult = callBack(propName, obj[propName]);
-        if (callBackResult !== null) {
-          result.push(callBackResult);
-        }
+        result[propName] = callBack(propName, obj[propName]);
       }
 
       return result;
@@ -51,6 +24,31 @@ export function objLoop<TKey extends string, TValue>(obj: Record<TKey, TValue>) 
       }
 
       return undefined;
+
+    },
+
+    findKey: (callBack: (key: TKey, value: TValue) => boolean): TKey | undefined => {
+
+      for (const propName in obj) {
+        if (callBack(propName, obj[propName])) {
+          return propName;
+        }
+      }
+
+      return undefined;
+
+    },
+
+    filter: (callBack: (key: TKey, value: TValue) => boolean): Record<TKey, TValue> => {
+      const result = {} as Record<TKey, TValue>;
+
+      for (const propName in obj) {
+        if (callBack(propName, obj[propName])) {
+          result[propName] = obj[propName];
+        }
+      }
+
+      return result;
 
     },
   }

@@ -1,9 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { objLoop } from '@chess/utils';
-import { PieceType, PieceColor, SquareId, PossibleMovement } from './types';
+import { PieceColor, PieceType, SquareId } from './types';
 import { StoreService } from './store.service';
-import { Piece } from './piece';
-
+import { firstValueFrom, map } from 'rxjs';
 
 
 @Injectable({providedIn: 'root'})
@@ -11,65 +9,60 @@ export class BoardService {
 
   private store = inject(StoreService);
 
-  public isKingInCheck(player: PieceColor): boolean {
-
-    const playerKing =
-      objLoop(this.store._piecesPosition)
-        .find((_, piece) => piece?.type === PieceType.King);
-
-
-    const isCheck = objLoop(this.store._piecesMovements)
-      .find((_, movements) =>
-        movements.some(movement => movement.squareId === playerKing?.startSquareId && movement.isAttackMove));
-
-    return !!isCheck;
-  }
-  public put(color: PieceColor, type: PieceType, startSquareId: SquareId) {
-    this.store.put(startSquareId, new Piece(type, color, startSquareId))
-    this.updateMovements();
+  constructor() {
+    // this.store.boardMovements$.subscribe(a => console.log('boardMovements$', a));
+    // this.store.selectedSquareMovements$.subscribe(a => console.log('selectedSquareMovements$', a));
+    this.store.isKingCheckByColor$(PieceColor.White).subscribe(a => console.log('white check', a));
+    this.store.isKingCheckByColor$(PieceColor.Black).subscribe(a => console.log('black check', a));
   }
 
 
-  public move(start: SquareId, end: SquareId) {
-    const isMoveSuccess = this.store._piecesPosition[start]?._move(end);
+  public addPiece(color: PieceColor, type: PieceType, startSquareId: SquareId) {
+    this.store.addPiece({type, color, startSquareId})
+  }
 
-    if (!isMoveSuccess) {
+
+  public async move(start: SquareId, end: SquareId) {
+
+    const canMove = await firstValueFrom(
+      this.store.pieceMovementsBySquareId$(start).pipe(
+        map(movements => movements.some(movement => movement.squareId === end))
+      )
+    );
+
+    if (canMove) {
+      this.store.replacePiece(start, end);
+    }
+  }
+
+  public resetSelection() {
+    this.store.resetSelection();
+  }
+
+  public async selectSquare(squareId: SquareId) {
+
+    const selectedSquareId = await firstValueFrom(this.store.selectedSquareId$);
+
+    // deselect the selected square
+    if (selectedSquareId === squareId) {
+      this.store.resetSelection();
       return;
     }
 
-    this.store.replace(start, end);
-    this.updateMovements();
-    // console.log('White Check', this.isKingInCheck(Player.White));
-    // console.log('Black Check', this.isKingInCheck(Player.Black));
-  }
+    const shouldMove = await firstValueFrom(
+      this.store.selectedSquareMovements$.pipe(
+        map(movements => movements.some(movement => movement.squareId === squareId))
+      )
+    );
 
-  public _resetSelection() {
-    this.store._resetSelection();
-  }
-
-  public _selectSquare(squareId: SquareId | null) {
-    if (this.store._selectedSquare === squareId) {
-      this.store._resetSelection();
+    // Move selected piece
+    if (selectedSquareId && shouldMove) {
+      await this.move(selectedSquareId, squareId);
+      this.store.resetSelection();
       return;
     }
 
-    if (
-      this.store._selectedSquareMovements.some(movement => movement.squareId === squareId)
-    ) {
-      this.move(this.store._selectedSquare, squareId);
-      this.store._resetSelection();
-      return;
-    }
-
+    // Select square
     this.store.selectSquare(squareId);
-  }
-
-  private updateMovements() {
-    const piecesMovements: Record<SquareId, PossibleMovement[]> = {};
-    objLoop(this.store._piecesPosition).forEach((squareId, piece) => {
-      piecesMovements[squareId] = piece?._updatePossibleMovements(this.store._piecesPosition);
-    });
-
-    this.store.replaceMovement(piecesMovements);
   }
 }

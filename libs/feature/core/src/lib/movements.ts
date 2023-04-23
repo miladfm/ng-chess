@@ -3,16 +3,24 @@ import {
   PieceColor,
   MovementDirection,
   Movement,
-  CanPieceMoveFnItem,
-  canPieceMoveFn,
+  canPieceMoveFn, PieceMovementConfig, BoardMovements, BoardPiece, PieceMovement, SquareId,
 } from './types';
+import { increaseLetter, LETTER_START_CHAR_CODE, letterToASCII, objLoop } from '@chess/utils';
 
 
+// region CAN_MOVE_FNS
+const isNextSquareUnoccupied: canPieceMoveFn = (current, next) => !next.piece;
+const isNextSquareOccupied: canPieceMoveFn = (current, next) => !!next.piece;
+const isPieceAtStartPosition: canPieceMoveFn = (current) =>
+  current.piece?.startSquareId === current.position;
+// endregion CAN_MOVE_FNS
+
+
+// region CONFIGS
 export const COLOR_MOVEMENT_DIRECTION: Record<PieceColor, MovementDirection> = {
   [PieceColor.White]: MovementDirection.Up,
   [PieceColor.Black]: MovementDirection.Down
 }
-
 
 const MOVEMENT = {
   UP_RIGHT: [1, 1] as Movement,
@@ -38,22 +46,7 @@ const MOVEMENT = {
   DOUBLE_UP_LEFT: [2, -1] as Movement
 }
 
-
-
-const isNextSquareUnoccupied: canPieceMoveFn = (current: CanPieceMoveFnItem, next: CanPieceMoveFnItem) => !next.piece;
-const isNextSquareOccupied: canPieceMoveFn = (current: CanPieceMoveFnItem, next: CanPieceMoveFnItem) => !!next.piece;
-const isPieceAtStartPosition: canPieceMoveFn = (current: CanPieceMoveFnItem, next: CanPieceMoveFnItem) =>
-  current.piece.startSquareId === current.position;
-
-
-interface PieceMovement {
-  movement: [number, number],
-  maxMovement?: number, // Default: Number.POSITIVE_INFINITY
-  canAttack?: boolean // Default: true
-  canMoveFns?: canPieceMoveFn[], // Default: []
-}
-
-export const PIECE_MOVEMENTS_BY_PIECE_TYPE:Record<PieceType, PieceMovement[]> = {
+const PIECE_MOVEMENTS_BY_PIECE_TYPE:Record<PieceType, PieceMovementConfig[]> = {
   [PieceType.Bishop]: [
     { movement: MOVEMENT.UP_RIGHT },
     { movement: MOVEMENT.UP_LEFT },
@@ -103,3 +96,93 @@ export const PIECE_MOVEMENTS_BY_PIECE_TYPE:Record<PieceType, PieceMovement[]> = 
     { movement: MOVEMENT.LEFT  },
   ]
 }
+// endregion CONFIGS
+
+// region FUNCTION
+
+function parseSquareId(squareId: SquareId): [string, number] {
+  return [ squareId[0], Number(squareId[1]) ];
+}
+
+function isSquareValid(squareId: SquareId, squaresPerSide: number) {
+  const colASCII = letterToASCII(squareId[0]);
+  const row = Number(squareId[1]);
+
+  const LETTER_VALID_MAX_CHAR_CODE = LETTER_START_CHAR_CODE + squaresPerSide;
+  const isColValid = LETTER_START_CHAR_CODE <= colASCII && colASCII <= LETTER_VALID_MAX_CHAR_CODE;
+  const isRowValid = 1 <= row && row <= squaresPerSide;
+
+  return isColValid && isRowValid;
+}
+
+export function getBoardMovements(boardPiece: BoardPiece, squaresPerSide: number): BoardMovements {
+  return objLoop(boardPiece).map((squareId: SquareId) => getPieceMovements(boardPiece, squareId, squaresPerSide))
+}
+
+export function getPieceMovements(boardPiece: BoardPiece, pieceSquareId: SquareId, squaresPerSide: number): PieceMovement[] {
+
+  const piece = boardPiece[pieceSquareId];
+
+  if (!piece) {
+    return [];
+  }
+  const [pieceCol, pieceRow] = parseSquareId(pieceSquareId);
+  const movements: PieceMovement[] = [];
+
+  // TODO: Write a short text, that is this loop about
+  for (const pieceMovement of PIECE_MOVEMENTS_BY_PIECE_TYPE[piece.type]) {
+
+    const {
+      movement,
+      maxMovement = Number.POSITIVE_INFINITY,
+      canAttack = true,
+      canMoveFns = []
+    } = pieceMovement;
+
+    const [rowMovement, colMovement] = movement.map(move => move * COLOR_MOVEMENT_DIRECTION[piece.color])
+    let nextRow = pieceRow + rowMovement;
+    let nextCol = increaseLetter(pieceCol, colMovement);
+    let isNextSquareValid = isSquareValid(`${nextCol}${nextRow}`, squaresPerSide);
+
+    let index = 1;
+    // TODO: Write a short text, that is this loop about
+    while (index <= maxMovement && isNextSquareValid) {
+
+      const nextSquareId: SquareId = `${nextCol}${nextRow}`;
+      const nextSquarePiece = boardPiece[nextSquareId];
+
+      const canMove = canMoveFns.every(fn => fn(
+        {position: pieceSquareId, piece: piece},
+        {position: nextSquareId, piece: nextSquarePiece},
+      ));
+
+      if (!canMove) {
+        break;
+      }
+
+      const isNextSquareOccupied = !!nextSquarePiece;
+      const isNextSquareEmpty = !nextSquarePiece;
+      const isNextSquareOpponent = isNextSquareOccupied && nextSquarePiece.color !== piece.color;
+      const isAttackMove = isNextSquareOpponent && canAttack;
+
+
+      if (isAttackMove || isNextSquareEmpty) {
+        movements.push({ squareId: nextSquareId, isAttackMove });
+      }
+
+      // Must be called after push the movement. Because for attack movement we have to push it into possibleMovements and then exit the loop.
+      if (isNextSquareOccupied) {
+        break;
+      }
+
+      // Move to next square in the direction
+      nextRow += rowMovement;
+      nextCol = increaseLetter(nextCol, colMovement);
+      index++;
+      isNextSquareValid = isSquareValid(`${nextCol}${nextRow}`, squaresPerSide);
+    }
+  }
+
+  return movements;
+}
+// endregion FUNCTION

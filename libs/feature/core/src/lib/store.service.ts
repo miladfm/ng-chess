@@ -1,80 +1,150 @@
-import { inject, Injectable } from '@angular/core';
-import { PieceColor, PossibleMovement, SquareId } from '@chess/core';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
-import { Piece } from './piece';
-import { ConfigService } from './config.service';
-import { LETTER_START_CHAR_CODE, letterToASCII, LETTER_MAX_CHAR_CODE, objLoop } from '@chess/utils';
+import { Injectable } from '@angular/core';
+import { BoardMovements, BoardPiece, Piece, PieceColor, PieceMovement, PieceType, SquareId } from './types';
+import {
+  combineLatest,
+  combineLatestWith,
+  distinctUntilChanged,
+  firstValueFrom,
+  Observable,
+  ObservedValueOf,
+} from 'rxjs';
+import { objLoop } from '@chess/utils';
+import { ComponentStore } from '@ngrx/component-store';
+import { getBoardMovements } from './movements';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { Projector, SelectConfig } from '@ngrx/component-store/src/component-store';
+
+
+export interface ChessConfig {
+  squaresPerSide: number;
+}
+export interface State {
+  // Board
+  boardPieces: BoardPiece;
+  selectedSquareId: SquareId | null;
+
+  // Config
+  config: ChessConfig
+}
+
+const INITIALIZE_STATE: State = {
+  boardPieces: {},
+  selectedSquareId: null,
+  config: {
+    squaresPerSide: 8,
+  }
+}
 
 @Injectable({providedIn: 'root'})
-export class StoreService {
+export class StoreService extends ComponentStore<State> {
 
-  private config = inject(ConfigService);
-
-  public _piecesPosition: Record<SquareId, Piece> = {};
-  public _piecesMovements: Record<SquareId, PossibleMovement[]> = {};
-  public _selectedSquare: SquareId;
-  public _selectedSquareMovements: PossibleMovement[] = [];
-
-  private positionsSubject$ = new BehaviorSubject(this._piecesPosition);
-  public positions$ = this.positionsSubject$.asObservable()
-
-  private selectedSquareSubject$ = new BehaviorSubject<SquareId>(null);
-  public selectedSquare$ = this.selectedSquareSubject$.pipe(distinctUntilChanged());
-
-  private movementSquareSubject$ = new BehaviorSubject(this._piecesMovements);
-  public movementSquare$ = this.movementSquareSubject$.pipe(distinctUntilChanged());
-
-  private selectedMovementSquareSubject$ = new BehaviorSubject<PossibleMovement[]>([]);
-  public selectedMovementSquare$ = this.selectedMovementSquareSubject$.pipe(distinctUntilChanged());
-
-  public _getPlayerPieces(player: PieceColor) {
-    return objLoop(this._piecesPosition)
-        .filter((square, piece) => piece?.color === player);
+  constructor() {
+    super(INITIALIZE_STATE);
   }
 
-  public _isSquareFree(square: SquareId) {
-    return !this._piecesPosition[square];
+  // region VIEW MODEL SELECTORS
+  public readonly boardPieces$: Observable<BoardPiece> = this.select(state => state.boardPieces);
+
+  public readonly selectedSquareId$: Observable<SquareId | null> = this.select(state => state.selectedSquareId);
+  public readonly config$: Observable<ChessConfig> = this.select(state => state.config);
+  public readonly configSquaresPerSide$: Observable<number> = this.select(this.config$, config => config.squaresPerSide);
+  // endregion VIEW MODEL SELECTORS
+
+  // region SELECTORS
+  public readonly boardMovements$: Observable<BoardMovements> = this.select(
+    this.boardPieces$,
+    this.configSquaresPerSide$,
+    getBoardMovements 
+  )
+
+  public readonly selectedSquareMovements$: Observable<PieceMovement[]> = this.select(
+    this.selectedSquareId$,
+    this.boardMovements$,
+    (selectedSquareId, boardMovements) => selectedSquareId ? boardMovements[selectedSquareId] : []
+  )
+  // endregion SELECTORS
+
+  // region PARAMETERS SELECTORS
+  public pieceColorBySquareId$(squareId: SquareId) {
+    return this.select(
+      this.boardPieces$,
+      boardPiece => boardPiece[squareId]?.color
+    )
   }
 
-  public _isSquareValid(square: SquareId) {
-    const colASCII = letterToASCII(square[0]);
-    const row = Number(square[1]);
-
-    const isColValid = LETTER_START_CHAR_CODE <= colASCII && colASCII <= LETTER_MAX_CHAR_CODE;
-    const isRowValid = 1 <= row && row <= this.config._squareLength;
-
-    return isColValid && isRowValid;
+  public pieceTypeBySquareId$(squareId: SquareId) {
+    return this.select(
+      this.boardPieces$,
+      boardPiece => boardPiece[squareId]?.type
+    )
   }
 
-  public _resetSelection() {
-    this._selectedSquare = null;
-    this._selectedSquareMovements = [];
-    this.selectedSquareSubject$.next(this._selectedSquare);
-    this.selectedMovementSquareSubject$.next(this._selectedSquareMovements);
+  public isSquareSelectedBySquareId$(squareId: SquareId) {
+    return this.select(
+      this.selectedSquareId$,
+      selectedSquareId => selectedSquareId === squareId
+    )
   }
 
-  public selectSquare(squareId: SquareId | null) {
-    this._selectedSquare = squareId;
-    this._selectedSquareMovements = this._piecesMovements[squareId] ?? [];
-    this.selectedSquareSubject$.next(this._selectedSquare);
-    this.selectedMovementSquareSubject$.next(this._selectedSquareMovements);
+  public pieceMovementsBySquareId$(squareId: SquareId) {
+    return this.select(this.boardMovements$, boredMovements => boredMovements[squareId])
   }
 
-  public put(position: SquareId, pieceInstance: Piece) {
-    this._piecesPosition[position] = pieceInstance;
-    this.positionsSubject$.next(this._piecesPosition);
+  public isSquaresAttackMoveBySquareId$(squareId: SquareId) {
+    return this.select(
+      this.selectedSquareMovements$,
+      selectedSquareMovements =>
+        selectedSquareMovements?.some(movement => movement.isAttackMove && movement.squareId === squareId)
+    )
   }
 
-  public replace(start: SquareId, end: SquareId) {
-    this._piecesPosition[end] = this._piecesPosition[start];
-    this._piecesPosition[start] = null;
-    this.positionsSubject$.next(this._piecesPosition);
+  public isSquaresFreeMoveBySquareId$(squareId: SquareId) {
+    return this.select(
+      this.selectedSquareMovements$,
+      selectedSquareMovements =>
+        selectedSquareMovements?.some(movement => !movement.isAttackMove && movement.squareId === squareId)
+    )
   }
 
-  public replaceMovement(movements: Record<SquareId, PossibleMovement[]>) {
-    console.log('replaceMovement', movements);
-    this._piecesMovements = movements;
-    this.movementSquareSubject$.next(movements);
+  public isKingCheckByColor$(pieceColor: PieceColor) {
+    return this.select(
+      this.boardMovements$.pipe(combineLatestWith(this.boardPieces$)),
+      ([boredMovements, boardPieces]) => {
+
+        const kingSquareId = objLoop(boardPieces)
+          .findKey((squareId, piece) => piece?.type === PieceType.King && piece.color === pieceColor);
+        
+        const checkingPieceSquareId = objLoop(boredMovements)
+          .findKey((squareId, movements) => movements.some(movement => movement.squareId === kingSquareId));
+
+        return checkingPieceSquareId;
+      }
+    )
+  }
+  // endregion PARAMETERS SELECTORS
+
+  // region UPDATE
+  public resetSelection() {
+    this.patchState(state => ({ selectedSquareId: null }))
   }
 
+  public selectSquare(selectedSquareId: SquareId | null) {
+    this.patchState(_ => ({ selectedSquareId }))
+  }
+
+  public addPiece(piece: Piece) {
+    this.patchState(state => ({ boardPieces: { ...state.boardPieces, [piece.startSquareId]: piece } }))
+    console.log('state', this.get());
+  }
+
+  public replacePiece(sourceSquareId: SquareId, destinationSquareId: SquareId) {
+    this.patchState(state => ({
+      boardPieces: {
+        ...state.boardPieces,
+        [sourceSquareId]: null,
+        [destinationSquareId]: state.boardPieces[sourceSquareId],
+      }
+    }))
+  }
+  // endregion UPDATE
 }

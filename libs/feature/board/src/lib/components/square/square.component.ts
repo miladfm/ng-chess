@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, Input, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { BoardService, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
-import { shareReplay, tap } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Observable, tap } from 'rxjs';
 
 @Component({
   selector: 'chess-square',
@@ -15,51 +14,40 @@ import { filter, map } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'class': "square",
-    '[class.square--white]': '!isDark',
-    '[class.square--black]': 'isDark',
+    '[class.square--white]': '!isDarkSquare',
+    '[class.square--black]': 'isDarkSquare',
     '(pointerdown)': 'onSquareSelect($event)'
   }
 })
-export class SquareComponent {
+export class SquareComponent implements OnInit {
 
-  @Input() isDark: boolean;
-  @Input() id: SquareId;
+  @Input() isDarkSquare: boolean;
+  @Input() squareId: SquareId;
 
   protected store = inject(StoreService);
   protected board = inject(BoardService);
 
-  protected player$ = this.store.positions$.pipe(
-    map(positions => positions[this.id]?.color),
-    filter((player) => !!player),
-    shareReplay()
-  )
-
-  protected piece$ = this.store.positions$.pipe(
-    map(positions => positions[this.id]),
-    map((piece) => piece?.type),
-  )
-
-  protected selected$ = this.store.selectedSquare$.pipe(
-    map(selectedSquare => selectedSquare === this.id)
-  )
-
-  protected attackMovement$ = this.store.selectedMovementSquare$.pipe(
-    map(movements => movements.filter(movement => movement.isAttackMove)),
-    map(movements => movements.some(movement => movement.squareId === this.id))
-  )
-
-  protected freeMovement$ = this.store.selectedMovementSquare$.pipe(
-    map(movements => movements.filter(movement => !movement.isAttackMove)),
-    map(movements => movements.some(movement => movement.squareId === this.id))
-  )
+  protected pieceColor$: Observable<PieceColor| undefined>;
+  protected pieceType$: Observable<PieceType| undefined>;
+  protected isSelected: Observable<boolean>;
+  protected isAttackMove$: Observable<boolean>;
+  protected isFreeMove$: Observable<boolean>;
 
 
   protected readonly Player = PieceColor;
   protected readonly Piece = PieceType;
 
+  ngOnInit() {
+    this.pieceColor$ = this.store.pieceColorBySquareId$(this.squareId); // .pipe(tap(a => console.log('pieceColor$', a)));
+    this.pieceType$ = this.store.pieceTypeBySquareId$(this.squareId); // .pipe(tap(a => console.log('pieceType$', a)));
+    this.isSelected = this.store.isSquareSelectedBySquareId$(this.squareId); // .pipe(tap(a => console.log('isSelected', a)));
+    this.isAttackMove$ = this.store.isSquaresAttackMoveBySquareId$(this.squareId); // .pipe(tap(a => console.log('isAttackMove$', a)));
+    this.isFreeMove$ = this.store.isSquaresFreeMoveBySquareId$(this.squareId); // .pipe(tap(a => console.log('isFreeMove$', a)));
+  }
 
-  protected onSquareSelect(event: Event) {
+
+  protected async onSquareSelect(event: Event) {
     event.stopPropagation();
-    this.board._selectSquare(this.id);
+    await this.board.selectSquare(this.squareId);
   }
 }

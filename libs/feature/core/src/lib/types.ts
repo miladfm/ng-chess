@@ -21,20 +21,30 @@ export enum PieceType {
 
 export interface Piece {
   type: PieceType,
-  startSquareId: SquareId,
   color: PieceColor
+  startSquareId: SquareId,
 }
 
 export type Movement = [number, number];
 
 export interface CanPieceMoveFnItem {
   position: SquareId,
-  piece: Piece
+  piece: Piece | null
+}
+
+export interface PieceMovementConfig {
+  movement: [number, number],
+  maxMovement?: number, // Default: Number.POSITIVE_INFINITY
+  canAttack?: boolean // Default: true
+  canMoveFns?: canPieceMoveFn[], // Default: []
 }
 
 export type canPieceMoveFn = (current: CanPieceMoveFnItem, next: CanPieceMoveFnItem) => boolean;
 
-export interface PossibleMovement {
+export interface PieceMovement {
   squareId: SquareId,
   isAttackMove: boolean
 }
+
+export type BoardPiece = Record<SquareId, Piece | null>;
+export type BoardMovements = Record<SquareId, PieceMovement[]>;
