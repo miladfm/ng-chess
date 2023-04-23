@@ -33,3 +33,8 @@ export interface CanPieceMoveFnItem {
 }
 
 export type canPieceMoveFn = (current: CanPieceMoveFnItem, next: CanPieceMoveFnItem) => boolean;
+
+export interface PossibleMovement {
+  squareId: SquareId,
+  isAttackMove: boolean
+}

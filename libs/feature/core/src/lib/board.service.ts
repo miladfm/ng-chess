@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { objLoop } from '@chess/utils';
-import { PieceType, PieceColor, SquareId } from './types';
+import { PieceType, PieceColor, SquareId, PossibleMovement } from './types';
 import { StoreService } from './store.service';
 import { Piece } from './piece';
 
@@ -13,16 +13,18 @@ export class BoardService {
 
   public isKingInCheck(player: PieceColor): boolean {
 
-    const opponentPieces = this.store._getPlayerPieces(player === PieceColor.White ? PieceColor.Black : PieceColor.White);
     const playerKing =
       objLoop(this.store._piecesPosition)
         .find((_, piece) => piece?.type === PieceType.King);
 
 
-    return playerKing && opponentPieces.some(piece => piece.attackMovements.includes(playerKing.startSquareId))
+    const isCheck = objLoop(this.store._piecesMovements)
+      .find((_, movements) =>
+        movements.some(movement => movement.squareId === playerKing?.startSquareId && movement.isAttackMove));
+
+    return !!isCheck;
   }
   public put(color: PieceColor, type: PieceType, startSquareId: SquareId) {
-
     this.store.put(startSquareId, new Piece(type, color, startSquareId))
     this.updateMovements();
   }
@@ -45,27 +47,29 @@ export class BoardService {
     this.store._resetSelection();
   }
 
-  public _selectSquare(square: SquareId | null) {
-    if (this.store._selectedSquare === square) {
+  public _selectSquare(squareId: SquareId | null) {
+    if (this.store._selectedSquare === squareId) {
       this.store._resetSelection();
       return;
     }
 
     if (
-      this.store._freeMovementSquare.includes(square) ||
-      this.store._attackMovementSquare.includes(square)
+      this.store._selectedSquareMovements.some(movement => movement.squareId === squareId)
     ) {
-      this.move(this.store._selectedSquare, square);
+      this.move(this.store._selectedSquare, squareId);
       this.store._resetSelection();
       return;
     }
 
-    this.store.selectSquare(square);
+    this.store.selectSquare(squareId);
   }
 
   private updateMovements() {
-    objLoop(this.store._piecesPosition).forEach((square, piece) => {
-      piece?._updatePossibleMovements(this.store._piecesPosition);
-    })
+    const piecesMovements: Record<SquareId, PossibleMovement[]> = {};
+    objLoop(this.store._piecesPosition).forEach((squareId, piece) => {
+      piecesMovements[squareId] = piece?._updatePossibleMovements(this.store._piecesPosition);
+    });
+
+    this.store.replaceMovement(piecesMovements);
   }
 }

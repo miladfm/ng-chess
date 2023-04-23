@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, Input, ViewEncapsulation } 
 import { CommonModule } from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { BoardService, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
-import { filter, map, shareReplay } from 'rxjs';
+import { shareReplay, tap } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'chess-square',
@@ -42,12 +43,14 @@ export class SquareComponent {
     map(selectedSquare => selectedSquare === this.id)
   )
 
-  protected attackMovement$ = this.store.attackMovementSquare$.pipe(
-    map(squares => squares.includes(this.id))
+  protected attackMovement$ = this.store.selectedMovementSquare$.pipe(
+    map(movements => movements.filter(movement => movement.isAttackMove)),
+    map(movements => movements.some(movement => movement.squareId === this.id))
   )
 
-  protected freeMovement$ = this.store.freeMovementSquare$.pipe(
-    map(squares => squares.includes(this.id))
+  protected freeMovement$ = this.store.selectedMovementSquare$.pipe(
+    map(movements => movements.filter(movement => !movement.isAttackMove)),
+    map(movements => movements.some(movement => movement.squareId === this.id))
   )
 
 

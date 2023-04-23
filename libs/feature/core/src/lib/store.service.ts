@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { PieceColor, SquareId } from '@chess/core';
-import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
+import { PieceColor, PossibleMovement, SquareId } from '@chess/core';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import { Piece } from './piece';
 import { ConfigService } from './config.service';
 import { LETTER_START_CHAR_CODE, letterToASCII, LETTER_MAX_CHAR_CODE, objLoop } from '@chess/utils';
@@ -11,9 +11,9 @@ export class StoreService {
   private config = inject(ConfigService);
 
   public _piecesPosition: Record<SquareId, Piece> = {};
+  public _piecesMovements: Record<SquareId, PossibleMovement[]> = {};
   public _selectedSquare: SquareId;
-  public _attackMovementSquare: SquareId[] = [];
-  public _freeMovementSquare: SquareId[] = [];
+  public _selectedSquareMovements: PossibleMovement[] = [];
 
   private positionsSubject$ = new BehaviorSubject(this._piecesPosition);
   public positions$ = this.positionsSubject$.asObservable()
@@ -21,12 +21,11 @@ export class StoreService {
   private selectedSquareSubject$ = new BehaviorSubject<SquareId>(null);
   public selectedSquare$ = this.selectedSquareSubject$.pipe(distinctUntilChanged());
 
-  private attackMovementSquareSubject$ = new BehaviorSubject<SquareId[]>([]);
-  public attackMovementSquare$ = this.attackMovementSquareSubject$.pipe(distinctUntilChanged());
+  private movementSquareSubject$ = new BehaviorSubject(this._piecesMovements);
+  public movementSquare$ = this.movementSquareSubject$.pipe(distinctUntilChanged());
 
-  private freeMovementSquareSubject$ = new BehaviorSubject<SquareId[]>([]);
-  public freeMovementSquare$ = this.freeMovementSquareSubject$.pipe(distinctUntilChanged());
-
+  private selectedMovementSquareSubject$ = new BehaviorSubject<PossibleMovement[]>([]);
+  public selectedMovementSquare$ = this.selectedMovementSquareSubject$.pipe(distinctUntilChanged());
 
   public _getPlayerPieces(player: PieceColor) {
     return objLoop(this._piecesPosition)
@@ -49,29 +48,16 @@ export class StoreService {
 
   public _resetSelection() {
     this._selectedSquare = null;
-    this._attackMovementSquare = [];
-    this._freeMovementSquare = [];
-
+    this._selectedSquareMovements = [];
     this.selectedSquareSubject$.next(this._selectedSquare);
-    this.attackMovementSquareSubject$.next(this._attackMovementSquare);
-    this.freeMovementSquareSubject$.next(this._freeMovementSquare);
+    this.selectedMovementSquareSubject$.next(this._selectedSquareMovements);
   }
 
-  public selectSquare(square: SquareId | null) {
-    this._selectedSquare = square;
-    this._attackMovementSquare = this._piecesPosition[this._selectedSquare]?.attackMovements ?? [];
-    this._freeMovementSquare = this._piecesPosition[this._selectedSquare]?.freeMovements ?? [];
-
+  public selectSquare(squareId: SquareId | null) {
+    this._selectedSquare = squareId;
+    this._selectedSquareMovements = this._piecesMovements[squareId] ?? [];
     this.selectedSquareSubject$.next(this._selectedSquare);
-    this.attackMovementSquareSubject$.next(this._attackMovementSquare);
-    this.freeMovementSquareSubject$.next(this._freeMovementSquare);
-
-    // console.group('Selected');
-    // console.log("_selectedSquare", this._selectedSquare);
-    // console.log("_attackMovementSquare", this._attackMovementSquare);
-    // console.log("_freeMovementSquare", this._freeMovementSquare);
-    // console.groupEnd();
-
+    this.selectedMovementSquareSubject$.next(this._selectedSquareMovements);
   }
 
   public put(position: SquareId, pieceInstance: Piece) {
@@ -83,6 +69,12 @@ export class StoreService {
     this._piecesPosition[end] = this._piecesPosition[start];
     this._piecesPosition[start] = null;
     this.positionsSubject$.next(this._piecesPosition);
+  }
+
+  public replaceMovement(movements: Record<SquareId, PossibleMovement[]>) {
+    console.log('replaceMovement', movements);
+    this._piecesMovements = movements;
+    this.movementSquareSubject$.next(movements);
   }
 
 }

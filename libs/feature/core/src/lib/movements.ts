@@ -49,7 +49,7 @@ const isPieceAtStartPosition: canPieceMoveFn = (current: CanPieceMoveFnItem, nex
 interface PieceMovement {
   movement: [number, number],
   maxMovement?: number, // Default: Number.POSITIVE_INFINITY
-  isAttackMove?: boolean // Default: true
+  canAttack?: boolean // Default: true
   canMoveFns?: canPieceMoveFn[], // Default: []
 }
 
@@ -81,8 +81,8 @@ export const PIECE_MOVEMENTS_BY_PIECE_TYPE:Record<PieceType, PieceMovement[]> = 
     { movement: MOVEMENT.DOUBLE_UP_LEFT, maxMovement: 1  },
   ],
   [PieceType.Pawn]: [
-    { movement: MOVEMENT.UP, maxMovement: 1, canMoveFns: [isNextSquareUnoccupied], isAttackMove: false },
-    { movement: MOVEMENT.DOUBLE_UP, maxMovement: 1, canMoveFns: [isPieceAtStartPosition], isAttackMove: false },
+    { movement: MOVEMENT.UP, maxMovement: 1, canMoveFns: [isNextSquareUnoccupied], canAttack: false },
+    { movement: MOVEMENT.DOUBLE_UP, maxMovement: 1, canMoveFns: [isPieceAtStartPosition], canAttack: false },
     { movement: MOVEMENT.UP_RIGHT, maxMovement: 1, canMoveFns: [isNextSquareOccupied]},
     { movement: MOVEMENT.UP_LEFT, maxMovement: 1, canMoveFns: [isNextSquareOccupied]},
   ],

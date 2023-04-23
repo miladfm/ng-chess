@@ -1,4 +1,4 @@
-import { MovementDirection, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
+import { MovementDirection, PieceType, PieceColor, SquareId, StoreService, PossibleMovement } from '@chess/core';
 import { movementsDirectionByPlayer } from './config';
 import { inject } from '@angular/core';
 import { increaseLetter } from '@chess/utils';
@@ -9,8 +9,6 @@ export class Piece {
   protected store = inject(StoreService);
 
   readonly type: PieceType;
-  public freeMovements: SquareId[] = [];
-  public attackMovements: SquareId[] = []; // possibleCaptureMovements, possibleThreatMovements
 
   public readonly startSquareId: SquareId;
   public currentPosition: SquareId;
@@ -32,70 +30,78 @@ export class Piece {
   }
 
 
-  public _move(newPosition: SquareId) {
-    const canMove =
-      this.freeMovements.includes(newPosition) ||
-      this.attackMovements.includes(newPosition);
+  public _move(newSquareId: SquareId) {
+    const movements = this.store._piecesMovements[this.currentPosition];
+    const canMove = movements.some(movement => movement.squareId === newSquareId);
 
     if (!canMove) {
-      console.log(`❌ ${this.color} ${this.type}: ${this.currentPosition} -> ${newPosition}. Possible movements are ${this.freeMovements} ${this.attackMovements}`);
+      console.log(`❌ ${this.color} ${this.type}: ${this.currentPosition} -> ${newSquareId}. Possible movements are ${movements.map(a => a.squareId)}`);
       return false;
     }
 
-    console.log(`✅ ${this.color} ${this.type}: ${this.currentPosition} -> ${newPosition}`);
-    this.currentPosition = newPosition;
+    console.log(`✅ ${this.color} ${this.type}: ${this.currentPosition} -> ${newSquareId}`);
+    this.currentPosition = newSquareId;
 
     return true;
   }
 
+
   public _updatePossibleMovements(piecesPosition: Record<SquareId, Piece>) {
-    this.freeMovements = [];
-    this.attackMovements = [];
+    const possibleMovements: PossibleMovement[] = [];
 
-
+    // TODO: Write a short text, that is this loop about
     for (const pieceMovement of PIECE_MOVEMENTS_BY_PIECE_TYPE[this.type]) {
 
       const {
         movement,
         maxMovement = Number.POSITIVE_INFINITY,
-        isAttackMove = true,
+        canAttack = true,
         canMoveFns = []
       } = pieceMovement;
 
-      const rowDir = movement[0] * COLOR_MOVEMENT_DIRECTION[this.color];
-      const colDir = movement[1] * COLOR_MOVEMENT_DIRECTION[this.color];
-      let newRow = this.row + rowDir;
-      let newCol = increaseLetter(this.col, colDir);
+      const [row, col] = movement.map(move => move * COLOR_MOVEMENT_DIRECTION[this.color])
+      let nextRow = this.row + row;
+      let nextCol = increaseLetter(this.col, col);
 
       let index = 1;
-      while (index <= maxMovement && this.store._isSquareValid(`${newCol}${newRow}`)) {
+      // TODO: Write a short text, that is this loop about
+      while (index <= maxMovement && this.store._isSquareValid(`${nextCol}${nextRow}`)) {
 
-        const nextSquare: SquareId = `${newCol}${newRow}`;
+        const nextSquareId: SquareId = `${nextCol}${nextRow}`;
+        const nextSquarePiece = piecesPosition[nextSquareId];
+
         const canMove = canMoveFns.every(fn => fn(
-          {position: this.currentPosition, piece: piecesPosition[this.currentPosition]},
-          {position: nextSquare, piece: piecesPosition[nextSquare]},
+          {position: this.currentPosition, piece: this},
+          {position: nextSquareId, piece: nextSquarePiece},
         ));
-        const isNextSquareCurrentPlayer = piecesPosition[nextSquare]?.color === this.color;
-        const isNextSquareOccupiedPlayer = piecesPosition[nextSquare] && piecesPosition[nextSquare].color !== this.color;
 
-
-        if (isNextSquareCurrentPlayer || !canMove) {
+        if (!canMove) {
           break;
         }
 
-        if (isNextSquareOccupiedPlayer && isAttackMove) {
-          this.attackMovements.push(nextSquare);
+        const isNextSquareOccupied = !!nextSquarePiece;
+        const isNextSquareEmpty = !nextSquarePiece;
+        const isNextSquareOpponent = isNextSquareOccupied && nextSquarePiece.color !== this.color;
+        const isAttackMove = isNextSquareOpponent && canAttack;
+
+
+        if (isAttackMove || isNextSquareEmpty) {
+          possibleMovements.push({ squareId: nextSquareId, isAttackMove });
+        }
+
+        // Must be called after push the movement. Because for attack movement we have to push it into possibleMovements and then exit the loop.
+        if (isNextSquareOccupied) {
           break;
         }
 
-        // Square is empty and valid for free movement
-        this.freeMovements.push(nextSquare);
 
         // Move to next square in the direction
-        newRow += rowDir;
-        newCol = increaseLetter(newCol, colDir);
+        nextRow += row;
+        nextCol = increaseLetter(nextCol, col);
         index++;
       }
     }
+
+    return possibleMovements;
   }
 }
