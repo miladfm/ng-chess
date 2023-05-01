@@ -7,7 +7,7 @@ import {
 import { objLoop } from '@chess/utils';
 import { ComponentStore } from '@ngrx/component-store';
 import { getBoardMovements } from './movements';
-import { isKingCheckByColor, movePiece } from './store.util';
+import { isCheckmateByColor, isKingCheckByColor, movePiece } from './store.util';
 
 
 export interface ChessConfig {
@@ -106,6 +106,14 @@ export class StoreService extends ComponentStore<State> {
       this.boardMovements$.pipe(combineLatestWith(this.boardPieces$)),
       ([boredMovements, boardPieces]) =>
         isKingCheckByColor(pieceColor, boredMovements, boardPieces)
+    )
+  }
+
+  public isCheckmateByColor$(pieceColor: PieceColor): Observable<boolean> {
+    return this.select(
+      this.boardMovements$.pipe(combineLatestWith(this.boardPieces$)),
+      ([boredMovements, boardPieces]) =>
+        isCheckmateByColor(pieceColor, boardPieces, boredMovements)
     )
   }
   // endregion PARAMETERS SELECTORS

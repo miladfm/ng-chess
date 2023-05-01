@@ -39,8 +39,8 @@ export class ChessBoardComponent {
 
     this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'b1');
     this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'g1');
-    this.boardService.addPiece(PieceColor.White, PieceType.King, 'd1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Queen, 'e1');
+    this.boardService.addPiece(PieceColor.White, PieceType.Queen, 'd1');
+    this.boardService.addPiece(PieceColor.White, PieceType.King, 'e1');
     this.boardService.addPiece(PieceColor.White, PieceType.Rook, 'a1');
     this.boardService.addPiece(PieceColor.White, PieceType.Rook, 'h1');
     this.boardService.addPiece(PieceColor.White, PieceType.Bishop, 'c1');
@@ -56,8 +56,8 @@ export class ChessBoardComponent {
 
     this.boardService.addPiece(PieceColor.Black, PieceType.Knight, 'b8');
     this.boardService.addPiece(PieceColor.Black, PieceType.Knight, 'g8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.King, 'd8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Queen, 'e8');
+    this.boardService.addPiece(PieceColor.Black, PieceType.Queen, 'd8');
+    this.boardService.addPiece(PieceColor.Black, PieceType.King, 'e8');
     this.boardService.addPiece(PieceColor.Black, PieceType.Rook, 'a8');
     this.boardService.addPiece(PieceColor.Black, PieceType.Rook, 'h8');
     this.boardService.addPiece(PieceColor.Black, PieceType.Bishop, 'f8');

@@ -14,6 +14,9 @@ export class BoardService {
     // this.store.selectedSquareMovements$.subscribe(a => console.log('selectedSquareMovements$', a));
     this.store.isKingCheckByColor$(PieceColor.White).subscribe(a => console.log('white check', a));
     this.store.isKingCheckByColor$(PieceColor.Black).subscribe(a => console.log('black check', a));
+
+    this.store.isCheckmateByColor$(PieceColor.White).subscribe(a => console.log('white checkmate', a));
+    this.store.isCheckmateByColor$(PieceColor.Black).subscribe(a => console.log('black checkmate', a));
   }
 
 

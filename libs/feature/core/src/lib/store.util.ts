@@ -22,3 +22,8 @@ export function movePiece(boardPieces: BoardPiece, sourceSquareId: SquareId, des
     [destinationSquareId]: boardPieces[sourceSquareId],
   }
 }
+
+export function isCheckmateByColor(pieceColor: PieceColor, boardPieces: BoardPiece, movements: BoardMovements) {
+  const pieceColorMovements = objLoop(movements).filter(squareId => boardPieces[squareId]?.color === pieceColor);
+  return !objLoop(pieceColorMovements).find((squareId, movements) => movements.length !== 0);
+}
