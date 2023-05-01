@@ -10,10 +10,8 @@ export class BoardService {
   private store = inject(StoreService);
 
   constructor() {
-    // this.store.boardMovements$.subscribe(a => console.log('boardMovements$', a));
-    // this.store.selectedSquareMovements$.subscribe(a => console.log('selectedSquareMovements$', a));
-    this.store.isKingCheckByColor$(PieceColor.White).subscribe(a => console.log('white check', a));
-    this.store.isKingCheckByColor$(PieceColor.Black).subscribe(a => console.log('black check', a));
+    this.store.kingCheckSquareIdByColor$(PieceColor.White).subscribe(a => console.log('white check', a));
+    this.store.kingCheckSquareIdByColor$(PieceColor.Black).subscribe(a => console.log('black check', a));
 
     this.store.isCheckmateByColor$(PieceColor.White).subscribe(a => console.log('white checkmate', a));
     this.store.isCheckmateByColor$(PieceColor.Black).subscribe(a => console.log('black checkmate', a));
@@ -21,7 +19,7 @@ export class BoardService {
 
 
   public addPiece(color: PieceColor, type: PieceType, startSquareId: SquareId) {
-    this.store.addPiece({type, color, startSquareId})
+    this.store.addPiece({type, color, startSquareId, hasMoved: false})
   }
 
 
@@ -34,7 +32,7 @@ export class BoardService {
     );
 
     if (canMove) {
-      this.store.replacePiece(start, end);
+      await this.store.replacePiece(start, end);
     }
   }
 

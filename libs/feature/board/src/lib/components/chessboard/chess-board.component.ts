@@ -35,8 +35,6 @@ export class ChessBoardComponent {
   constructor() {
     this.configService.setSquareLength(this.squareLength);
 
-    // this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'a2');
-
     this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'b1');
     this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'g1');
     this.boardService.addPiece(PieceColor.White, PieceType.Queen, 'd1');
@@ -70,14 +68,6 @@ export class ChessBoardComponent {
     this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'f7');
     this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'g7');
     this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'h7');
-
-
-    // setTimeout(() => this.boardService.move('a2', 'a3'), 1000)
-    // setTimeout(() => this.boardService.move('a3', 'a5'), 2000)
-    // setTimeout(() => this.boardService.move('b7', 'b5'), 3000)
-    // setTimeout(() => this.boardService.move('b5', 'b3'), 4000)
-    // setTimeout(() => this.boardService.move('b5', 'b4'), 5000)
-
   }
 
   onDrop(e: CdkDragDrop<SquareId>) {

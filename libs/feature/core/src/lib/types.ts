@@ -23,6 +23,7 @@ export interface Piece {
   type: PieceType,
   color: PieceColor
   startSquareId: SquareId,
+  hasMoved: boolean;
 }
 
 export type Movement = [number, number];
@@ -41,10 +42,15 @@ export interface PieceMovementConfig {
 
 export type canPieceMoveFn = (current: CanPieceMoveFnItem, next: CanPieceMoveFnItem) => boolean;
 
+export interface ExtraPieceMovement {
+  from: SquareId,
+  to: SquareId
+}
 export interface PieceMovement {
   squareId: SquareId,
-  isAttackMove: boolean
+  isAttackMove: boolean,
+  extraMovement?: ExtraPieceMovement
 }
 
-export type BoardPiece = Record<SquareId, Piece | null>;
+export type BoardPieces = Record<SquareId, Piece | null>;
 export type BoardMovements = Record<SquareId, PieceMovement[]>;

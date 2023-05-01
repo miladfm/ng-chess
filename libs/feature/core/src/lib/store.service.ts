@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BoardMovements, BoardPiece, Piece, PieceColor, PieceMovement, PieceType, SquareId } from './types';
+import { BoardMovements, BoardPieces, Piece, PieceColor, PieceMovement, PieceType, SquareId } from './types';
 import {
-  combineLatestWith,
+  combineLatestWith, firstValueFrom,
   Observable,
 } from 'rxjs';
-import { objLoop } from '@chess/utils';
 import { ComponentStore } from '@ngrx/component-store';
 import { getBoardMovements } from './movements';
-import { isCheckmateByColor, isKingCheckByColor, movePiece } from './store.util';
+import { isCheckmateByColor, getKingCheckSquareIdByColor, movePiece } from './store.util';
 
 
 export interface ChessConfig {
@@ -15,7 +14,7 @@ export interface ChessConfig {
 }
 export interface State {
   // Board
-  boardPieces: BoardPiece;
+  boardPieces: BoardPieces;
   selectedSquareId: SquareId | null;
 
   // Config
@@ -38,7 +37,7 @@ export class StoreService extends ComponentStore<State> {
   }
 
   // region VIEW MODEL SELECTORS
-  public readonly boardPieces$: Observable<BoardPiece> = this.select(state => state.boardPieces);
+  public readonly boardPieces$: Observable<BoardPieces> = this.select(state => state.boardPieces);
 
   public readonly selectedSquareId$: Observable<SquareId | null> = this.select(state => state.selectedSquareId);
   public readonly config$: Observable<ChessConfig> = this.select(state => state.config);
@@ -55,37 +54,37 @@ export class StoreService extends ComponentStore<State> {
   public readonly selectedSquareMovements$: Observable<PieceMovement[]> = this.select(
     this.selectedSquareId$,
     this.boardMovements$,
-    (selectedSquareId, boardMovements) => selectedSquareId ? boardMovements[selectedSquareId] : []
+    (selectedSquareId, boardMovements) => boardMovements[selectedSquareId!] ?? []
   )
   // endregion SELECTORS
 
   // region PARAMETERS SELECTORS
-  public pieceColorBySquareId$(squareId: SquareId) {
+  public pieceColorBySquareId$(squareId: SquareId): Observable<PieceColor | undefined> {
     return this.select(
       this.boardPieces$,
-      boardPiece => boardPiece[squareId]?.color
+      boardPieces => boardPieces[squareId]?.color
     )
   }
 
-  public pieceTypeBySquareId$(squareId: SquareId) {
+  public pieceTypeBySquareId$(squareId: SquareId): Observable<PieceType | undefined> {
     return this.select(
       this.boardPieces$,
-      boardPiece => boardPiece[squareId]?.type
+      boardPieces => boardPieces[squareId]?.type
     )
   }
 
-  public isSquareSelectedBySquareId$(squareId: SquareId) {
+  public isSquareSelectedBySquareId$(squareId: SquareId): Observable<boolean> {
     return this.select(
       this.selectedSquareId$,
       selectedSquareId => selectedSquareId === squareId
     )
   }
 
-  public pieceMovementsBySquareId$(squareId: SquareId) {
+  public pieceMovementsBySquareId$(squareId: SquareId): Observable<PieceMovement[]> {
     return this.select(this.boardMovements$, boredMovements => boredMovements[squareId])
   }
 
-  public isSquaresAttackMoveBySquareId$(squareId: SquareId) {
+  public isSquaresAttackMoveBySquareId$(squareId: SquareId): Observable<boolean> {
     return this.select(
       this.selectedSquareMovements$,
       selectedSquareMovements =>
@@ -93,7 +92,7 @@ export class StoreService extends ComponentStore<State> {
     )
   }
 
-  public isSquaresFreeMoveBySquareId$(squareId: SquareId) {
+  public isSquaresFreeMoveBySquareId$(squareId: SquareId): Observable<boolean> {
     return this.select(
       this.selectedSquareMovements$,
       selectedSquareMovements =>
@@ -101,11 +100,11 @@ export class StoreService extends ComponentStore<State> {
     )
   }
 
-  public isKingCheckByColor$(pieceColor: PieceColor) {
+  public kingCheckSquareIdByColor$(pieceColor: PieceColor): Observable<SquareId | undefined> {
     return this.select(
       this.boardMovements$.pipe(combineLatestWith(this.boardPieces$)),
       ([boredMovements, boardPieces]) =>
-        isKingCheckByColor(pieceColor, boredMovements, boardPieces)
+        getKingCheckSquareIdByColor({ boardPieces, boardMovements: boredMovements, pieceColor })
     )
   }
 
@@ -120,21 +119,22 @@ export class StoreService extends ComponentStore<State> {
 
   // region UPDATE
   public resetSelection() {
-    this.patchState(state => ({ selectedSquareId: null }))
+    this.patchState(({ selectedSquareId: null }));
   }
 
   public selectSquare(selectedSquareId: SquareId | null) {
-    this.patchState(_ => ({ selectedSquareId }))
+    this.patchState(({ selectedSquareId }))
   }
 
   public addPiece(piece: Piece) {
     this.patchState(state => ({ boardPieces: { ...state.boardPieces, [piece.startSquareId]: piece } }))
-    console.log('state', this.get());
   }
 
-  public replacePiece(sourceSquareId: SquareId, destinationSquareId: SquareId) {
+  public async replacePiece(sourceSquareId: SquareId, destinationSquareId: SquareId) {
+    const boardMovements = await firstValueFrom(this.boardMovements$);
+    const extraMovement = boardMovements[sourceSquareId].find(pieceMovement => pieceMovement.squareId === destinationSquareId)?.extraMovement;
     this.patchState(state => ({
-      boardPieces: movePiece(state.boardPieces, sourceSquareId, destinationSquareId)
+      boardPieces: movePiece(state.boardPieces, sourceSquareId, destinationSquareId, extraMovement)
     }))
   }
   // endregion UPDATE

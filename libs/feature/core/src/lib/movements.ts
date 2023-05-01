@@ -1,6 +1,6 @@
 import {
   BoardMovements,
-  BoardPiece,
+  BoardPieces,
   canPieceMoveFn,
   Movement,
   MovementDirection,
@@ -11,7 +11,8 @@ import {
   SquareId,
 } from './types';
 import { increaseLetter, LETTER_START_CHAR_CODE, letterToASCII, objLoop } from '@chess/utils';
-import { isKingCheckByColor, movePiece } from './store.util';
+import { findPieceByColorAndType, getKingCheckSquareIdByColor, movePiece, parseSquareId } from './store.util';
+import { getCastlingPieceMovementsByColor } from './castling-movements';
 
 
 // region CAN_MOVE_FNS
@@ -106,10 +107,6 @@ const PIECE_MOVEMENTS_BY_PIECE_TYPE:Record<PieceType, PieceMovementConfig[]> = {
 
 // region FUNCTION
 
-function parseSquareId(squareId: SquareId): [string, number] {
-  return [ squareId[0], Number(squareId[1]) ];
-}
-
 function isSquareValid(squareId: SquareId, squaresPerSide: number) {
   const colASCII = letterToASCII(squareId[0]);
   const row = Number(squareId[1]);
@@ -121,35 +118,59 @@ function isSquareValid(squareId: SquareId, squaresPerSide: number) {
   return isColValid && isRowValid;
 }
 
-export function getBoardMovementsWithoutKingCheck(boardPiece: BoardPiece, squaresPerSide: number): BoardMovements {
-  return objLoop(boardPiece).map((squareId: SquareId) => getPieceMovements(boardPiece, squareId, squaresPerSide))
+export function getBoardMovementsWithoutKingCheck(boardPieces: BoardPieces, squaresPerSide: number): BoardMovements {
+  return objLoop(boardPieces).map((squareId: SquareId) => getPieceMovements(boardPieces, squareId, squaresPerSide))
 }
 
-export function getBoardMovements(boardPiece: BoardPiece, squaresPerSide: number) {
-  const movements = {} as BoardMovements;
-  const movementsWithoutKingCheck = getBoardMovementsWithoutKingCheck(boardPiece, squaresPerSide)
+export function getBoardMovements(boardPieces: BoardPieces, squaresPerSide: number) {
+  const boardMovements = {} as BoardMovements;
+  const movementsWithoutKingCheck = getBoardMovementsWithoutKingCheck(boardPieces, squaresPerSide)
 
+  // Standard movements
   objLoop(movementsWithoutKingCheck).forEach((squareId,pieceMove ) => {
     const pieceMovement = [] as PieceMovement[];
     pieceMove.forEach(pieceMovementCandidate => {
-      const tmpBoardPiece = movePiece(boardPiece, squareId, pieceMovementCandidate.squareId);
+      const tmpBoardPiece = movePiece(boardPieces, squareId, pieceMovementCandidate.squareId);
       const tmpMovementsWithoutKingCheck = getBoardMovementsWithoutKingCheck(tmpBoardPiece, squaresPerSide);
 
       if (
-        !isKingCheckByColor(boardPiece[squareId]!.color, tmpMovementsWithoutKingCheck, tmpBoardPiece)
+        !getKingCheckSquareIdByColor({
+          boardPieces: tmpBoardPiece,
+          boardMovements: tmpMovementsWithoutKingCheck,
+          pieceColor: boardPieces[squareId]!.color
+        })
       ) {
         pieceMovement.push(pieceMovementCandidate);
       }
     });
 
-    movements[squareId] = pieceMovement;
-  })
-  return movements;
+    boardMovements[squareId] = pieceMovement;
+  });
+
+  // White king castling
+  const whiteKingCastlingSquareId = findPieceByColorAndType(boardPieces, PieceColor.White, PieceType.King)?.key;
+  if (whiteKingCastlingSquareId) {
+    const whiteCastlingPieceMovements = getCastlingPieceMovementsByColor({ boardPieces, boardMovements, pieceColor: PieceColor.White });
+    objLoop(whiteCastlingPieceMovements).forEach((squareId, pieceMovement) => {
+      boardMovements[squareId] = [...boardMovements[squareId], ...pieceMovement];
+    })
+  }
+
+  // Black king castling
+  const blackKingCastlingSquareId = findPieceByColorAndType(boardPieces, PieceColor.Black, PieceType.King)?.key;
+  if(blackKingCastlingSquareId) {
+    const blackCastlingPieceMovements = getCastlingPieceMovementsByColor({ boardPieces, boardMovements, pieceColor: PieceColor.Black });
+    objLoop(blackCastlingPieceMovements).forEach((squareId, pieceMovement) => {
+      boardMovements[squareId] = [...boardMovements[squareId], ...pieceMovement];
+    })
+  }
+
+  return boardMovements;
 }
 
-export function getPieceMovements(boardPiece: BoardPiece, pieceSquareId: SquareId, squaresPerSide: number): PieceMovement[] {
+export function getPieceMovements(boardPieces: BoardPieces, pieceSquareId: SquareId, squaresPerSide: number): PieceMovement[] {
 
-  const piece = boardPiece[pieceSquareId];
+  const piece = boardPieces[pieceSquareId];
 
   if (!piece) {
     return [];
@@ -177,11 +198,11 @@ export function getPieceMovements(boardPiece: BoardPiece, pieceSquareId: SquareI
     while (index <= maxMovement && isNextSquareValid) {
 
       const nextSquareId: SquareId = `${nextCol}${nextRow}`;
-      const nextSquarePiece = boardPiece[nextSquareId];
+      const nextSquarePiece = boardPieces[nextSquareId];
 
       const canMove = canMoveFns.every(fn => fn(
         {position: pieceSquareId, piece: piece},
-        {position: nextSquareId, piece: nextSquarePiece},
+        {position: nextSquareId, piece: nextSquarePiece}
       ));
 
       if (!canMove) {
