@@ -1,11 +1,17 @@
 import {
-  PieceType,
-  PieceColor,
-  MovementDirection,
+  BoardMovements,
+  BoardPiece,
+  canPieceMoveFn,
   Movement,
-  canPieceMoveFn, PieceMovementConfig, BoardMovements, BoardPiece, PieceMovement, SquareId,
+  MovementDirection,
+  PieceColor,
+  PieceMovement,
+  PieceMovementConfig,
+  PieceType,
+  SquareId,
 } from './types';
 import { increaseLetter, LETTER_START_CHAR_CODE, letterToASCII, objLoop } from '@chess/utils';
+import { isKingCheckByColor, movePiece } from './store.util';
 
 
 // region CAN_MOVE_FNS
@@ -115,8 +121,30 @@ function isSquareValid(squareId: SquareId, squaresPerSide: number) {
   return isColValid && isRowValid;
 }
 
-export function getBoardMovements(boardPiece: BoardPiece, squaresPerSide: number): BoardMovements {
+export function getBoardMovementsWithoutKingCheck(boardPiece: BoardPiece, squaresPerSide: number): BoardMovements {
   return objLoop(boardPiece).map((squareId: SquareId) => getPieceMovements(boardPiece, squareId, squaresPerSide))
+}
+
+export function getBoardMovements(boardPiece: BoardPiece, squaresPerSide: number) {
+  const movements = {} as BoardMovements;
+  const movementsWithoutKingCheck = getBoardMovementsWithoutKingCheck(boardPiece, squaresPerSide)
+
+  objLoop(movementsWithoutKingCheck).forEach((squareId,pieceMove ) => {
+    const pieceMovement = [] as PieceMovement[];
+    pieceMove.forEach(pieceMovementCandidate => {
+      const tmpBoardPiece = movePiece(boardPiece, squareId, pieceMovementCandidate.squareId);
+      const tmpMovementsWithoutKingCheck = getBoardMovementsWithoutKingCheck(tmpBoardPiece, squaresPerSide);
+
+      if (
+        !isKingCheckByColor(boardPiece[squareId]!.color, tmpMovementsWithoutKingCheck, tmpBoardPiece)
+      ) {
+        pieceMovement.push(pieceMovementCandidate);
+      }
+    });
+
+    movements[squareId] = pieceMovement;
+  })
+  return movements;
 }
 
 export function getPieceMovements(boardPiece: BoardPiece, pieceSquareId: SquareId, squaresPerSide: number): PieceMovement[] {

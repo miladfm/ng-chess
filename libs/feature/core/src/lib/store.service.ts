@@ -1,18 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BoardMovements, BoardPiece, Piece, PieceColor, PieceMovement, PieceType, SquareId } from './types';
 import {
-  combineLatest,
   combineLatestWith,
-  distinctUntilChanged,
-  firstValueFrom,
   Observable,
-  ObservedValueOf,
 } from 'rxjs';
 import { objLoop } from '@chess/utils';
 import { ComponentStore } from '@ngrx/component-store';
 import { getBoardMovements } from './movements';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import { Projector, SelectConfig } from '@ngrx/component-store/src/component-store';
+import { isKingCheckByColor, movePiece } from './store.util';
 
 
 export interface ChessConfig {
@@ -109,16 +104,8 @@ export class StoreService extends ComponentStore<State> {
   public isKingCheckByColor$(pieceColor: PieceColor) {
     return this.select(
       this.boardMovements$.pipe(combineLatestWith(this.boardPieces$)),
-      ([boredMovements, boardPieces]) => {
-
-        const kingSquareId = objLoop(boardPieces)
-          .findKey((squareId, piece) => piece?.type === PieceType.King && piece.color === pieceColor);
-        
-        const checkingPieceSquareId = objLoop(boredMovements)
-          .findKey((squareId, movements) => movements.some(movement => movement.squareId === kingSquareId));
-
-        return checkingPieceSquareId;
-      }
+      ([boredMovements, boardPieces]) =>
+        isKingCheckByColor(pieceColor, boredMovements, boardPieces)
     )
   }
   // endregion PARAMETERS SELECTORS
@@ -139,11 +126,7 @@ export class StoreService extends ComponentStore<State> {
 
   public replacePiece(sourceSquareId: SquareId, destinationSquareId: SquareId) {
     this.patchState(state => ({
-      boardPieces: {
-        ...state.boardPieces,
-        [sourceSquareId]: null,
-        [destinationSquareId]: state.boardPieces[sourceSquareId],
-      }
+      boardPieces: movePiece(state.boardPieces, sourceSquareId, destinationSquareId)
     }))
   }
   // endregion UPDATE
