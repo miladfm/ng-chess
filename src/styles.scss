@@ -1,5 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
+html {
+  background-color: #E5E5E5;
+}
+
 html, body {
   margin: 56px;
   padding: 0;
@@ -10,10 +14,10 @@ html, body {
 }
 
 :root {
-  --board-black-color: #B58763;
-  --board-white-color: #F0D9B5;
-  --board-border-color: #333333;
-  --board-border-size: 8px;
+  --square-black-color: #97C1D8;
+  --square-white-color: #E0FBFB;
+  --square-active-color: #5e88c0;
+  --square-attack-color: #EE6C4D;
 }
 
 

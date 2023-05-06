@@ -3,31 +3,20 @@
   class='board'
   [ngStyle]="{ '--square-length': squareLength }">
 
-  <div class='labels--top'>
-    <div *chessLettersLabel='squareLength; let letter = letter'>{{letter}}</div>
+  <div class='labels--top'></div>
+  <div class='labels--right'></div>
+
+  <div class='labels--bottom labels--with-text'>
+    <div *chessLettersLabel='squareLength; let letter = letter' class="labels__text">{{letter}}</div>
   </div>
-  <div class='labels--right'>
-    <div *chessNumberLabel='squareLength; let index = index'>{{index}}</div>
-  </div>
-  <div class='labels--bottom'>
-    <div *chessLettersLabel='squareLength; let letter = letter'>{{letter}}</div>
-  </div>
-  <div class='labels--left'>
-    <div *chessNumberLabel='squareLength; let index = index'>{{index}}</div>
+  <div class='labels--left labels--with-text'>
+    <div *chessNumberLabel='squareLength; let index = index' class="labels__text">{{index}}</div>
   </div>
 
-  <div class='corner--top-left'>
-    <div class='corner-background'></div>
-  </div>
-  <div class='corner--top-right'>
-    <div class='corner-background'></div>
-  </div>
-  <div class='corner--bottom-left'>
-    <div class='corner-background'></div>
-  </div>
-  <div class='corner--bottom-right'>
-    <div class='corner-background'></div>
-  </div>
+  <div class='corner--top-left'></div>
+  <div class='corner--top-right'></div>
+  <div class='corner--bottom-left'></div>
+  <div class='corner--bottom-right'></div>
 
   <chess-square
     *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'

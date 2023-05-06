@@ -29,7 +29,7 @@ export class SquareComponent implements OnInit {
 
   protected pieceColor$: Observable<PieceColor| undefined>;
   protected pieceType$: Observable<PieceType| undefined>;
-  protected isSelected: Observable<boolean>;
+  protected isSelected$: Observable<boolean>;
   protected isAttackMove$: Observable<boolean>;
   protected isFreeMove$: Observable<boolean>;
 
@@ -40,7 +40,7 @@ export class SquareComponent implements OnInit {
   ngOnInit() {
     this.pieceColor$ = this.store.pieceColorBySquareId$(this.squareId); // .pipe(tap(a => console.log('pieceColor$', a)));
     this.pieceType$ = this.store.pieceTypeBySquareId$(this.squareId); // .pipe(tap(a => console.log('pieceType$', a)));
-    this.isSelected = this.store.isSquareSelectedBySquareId$(this.squareId); // .pipe(tap(a => console.log('isSelected', a)));
+    this.isSelected$ = this.store.isSquareSelectedBySquareId$(this.squareId); // .pipe(tap(a => console.log('isSelected', a)));
     this.isAttackMove$ = this.store.isSquaresAttackMoveBySquareId$(this.squareId); // .pipe(tap(a => console.log('isAttackMove$', a)));
     this.isFreeMove$ = this.store.isSquaresFreeMoveBySquareId$(this.squareId); // .pipe(tap(a => console.log('isFreeMove$', a)));
   }
