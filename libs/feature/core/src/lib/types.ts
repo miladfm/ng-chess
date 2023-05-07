@@ -52,5 +52,28 @@ export interface PieceMovement {
   extraMovement?: ExtraPieceMovement
 }
 
+export enum MovementHistoryType {
+  Put = 'Put',
+  Move = 'Move',
+  StartGame = 'StartGame'
+}
+
+export interface MovementHistory {
+  type: MovementHistoryType,
+  boardPieces: BoardPieces,
+  from?: SquareId, // Available only for Move type
+  to?: SquareId, // Available only for Move and Put type
+}
+
+export interface PieceMovementsHistory {
+  index: number;
+  type: MovementHistoryType,
+  piece?: Piece,
+  from?: SquareId,
+  to?: SquareId,
+}
+
+
+
 export type BoardPieces = Record<SquareId, Piece | null>;
 export type BoardMovements = Record<SquareId, PieceMovement[]>;

@@ -1,0 +1,22 @@
+.history__entry {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 0px 12px;
+  margin: 4px 0px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f4f2f2;
+  }
+}
+
+.history__entry--selected {
+  cursor: auto;
+  background-color: var(--selected-item-color);
+
+  &:hover {
+    background-color: var(--selected-item-color);
+  }
+}

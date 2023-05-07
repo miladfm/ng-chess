@@ -1,12 +1,20 @@
 import { Injectable } from '@angular/core';
-import { BoardMovements, BoardPieces, Piece, PieceColor, PieceMovement, PieceType, SquareId } from './types';
 import {
-  combineLatestWith, firstValueFrom,
-  Observable,
-} from 'rxjs';
+  BoardMovements,
+  BoardPieces,
+  MovementHistory,
+  MovementHistoryType,
+  Piece,
+  PieceColor,
+  PieceMovement,
+  PieceMovementsHistory,
+  PieceType,
+  SquareId,
+} from './types';
+import { combineLatestWith, firstValueFrom, Observable } from 'rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { getBoardMovements } from './movements';
-import { isCheckmateByColor, getKingCheckSquareIdByColor, movePiece } from './store.util';
+import { getKingCheckSquareIdByColor, isCheckmateByColor, movePiece } from './store.util';
 
 
 export interface ChessConfig {
@@ -14,16 +22,19 @@ export interface ChessConfig {
 }
 export interface State {
   // Board
-  boardPieces: BoardPieces;
+  // boardPieces: BoardPieces;
   selectedSquareId: SquareId | null;
-
+  movementsHistories: MovementHistory[],
+  selectedMovementsHistoryIndex: number | null;
   // Config
   config: ChessConfig
 }
 
 const INITIALIZE_STATE: State = {
-  boardPieces: {},
+  // boardPieces: {},
   selectedSquareId: null,
+  selectedMovementsHistoryIndex: null,
+  movementsHistories: [],
   config: {
     squaresPerSide: 8,
   }
@@ -37,7 +48,10 @@ export class StoreService extends ComponentStore<State> {
   }
 
   // region VIEW MODEL SELECTORS
-  public readonly boardPieces$: Observable<BoardPieces> = this.select(state => state.boardPieces);
+  public readonly movementsHistories$: Observable<MovementHistory[]> = this.select(state => state.movementsHistories);
+  public readonly selectedMovementsHistoryIndex$: Observable<number> = this.select(state =>
+    state.selectedMovementsHistoryIndex ?? state.movementsHistories.length - 1
+  );
 
   public readonly selectedSquareId$: Observable<SquareId | null> = this.select(state => state.selectedSquareId);
   public readonly config$: Observable<ChessConfig> = this.select(state => state.config);
@@ -45,6 +59,12 @@ export class StoreService extends ComponentStore<State> {
   // endregion VIEW MODEL SELECTORS
 
   // region SELECTORS
+  public readonly boardPieces$: Observable<BoardPieces> = this.select(
+    this.selectedMovementsHistoryIndex$.pipe(combineLatestWith(this.movementsHistories$)),
+    ([selectedMovementsHistoryIndex, movementsHistories] ) =>
+      movementsHistories[selectedMovementsHistoryIndex]?.boardPieces ?? {}
+  );
+
   public readonly boardMovements$: Observable<BoardMovements> = this.select(
     this.boardPieces$,
     this.configSquaresPerSide$,
@@ -55,6 +75,20 @@ export class StoreService extends ComponentStore<State> {
     this.selectedSquareId$,
     this.boardMovements$,
     (selectedSquareId, boardMovements) => boardMovements[selectedSquareId!] ?? []
+  )
+
+  public readonly pieceMovementsHistories$: Observable<PieceMovementsHistory[]> = this.select(
+    this.movementsHistories$,
+    (movementsHistories) => {
+      const startGameIndex = movementsHistories.findIndex(movementsHistory => movementsHistory.type === MovementHistoryType.StartGame)
+      return movementsHistories.slice(startGameIndex).map((movementsHistory, index) => ({
+        type: movementsHistory.type,
+        piece: movementsHistory.boardPieces[movementsHistory.to!]!,
+        from: movementsHistory.from,
+        to: movementsHistory.to,
+        index: index + startGameIndex
+      }));
+    }
   )
   // endregion SELECTORS
 
@@ -118,6 +152,16 @@ export class StoreService extends ComponentStore<State> {
   // endregion PARAMETERS SELECTORS
 
   // region UPDATE
+
+  public startGame() {
+    this.patchState(state => ({
+      movementsHistories: [
+        ...state.movementsHistories,
+        { type: MovementHistoryType.StartGame, boardPieces: state.movementsHistories[state.movementsHistories.length - 1].boardPieces }
+      ],
+      selectedMovementsHistoryIndex: null
+    }));
+  }
   public resetSelection() {
     this.patchState(({ selectedSquareId: null }));
   }
@@ -126,16 +170,48 @@ export class StoreService extends ComponentStore<State> {
     this.patchState(({ selectedSquareId }))
   }
 
-  public addPiece(piece: Piece) {
-    this.patchState(state => ({ boardPieces: { ...state.boardPieces, [piece.startSquareId]: piece } }))
+  public async addPiece(piece: Piece) {
+    const boardPieces = await firstValueFrom(this.boardPieces$);
+    const selectedMovementsHistoryIndex = await firstValueFrom(this.selectedMovementsHistoryIndex$);
+    this.patchState(state => {
+      const newBoardPieces = { ...boardPieces, [piece.startSquareId]: piece };
+      return {
+        movementsHistories: [
+          ...state.movementsHistories.slice(0, selectedMovementsHistoryIndex + 1),
+          { type: MovementHistoryType.Put, boardPieces: newBoardPieces, to: piece.startSquareId }
+        ],
+        selectedMovementsHistoryIndex: null
+      }})
   }
 
   public async replacePiece(sourceSquareId: SquareId, destinationSquareId: SquareId) {
     const boardMovements = await firstValueFrom(this.boardMovements$);
+    const boardPieces = await firstValueFrom(this.boardPieces$);
+    const selectedMovementsHistoryIndex = await firstValueFrom(this.selectedMovementsHistoryIndex$);
+
     const extraMovement = boardMovements[sourceSquareId].find(pieceMovement => pieceMovement.squareId === destinationSquareId)?.extraMovement;
-    this.patchState(state => ({
-      boardPieces: movePiece(state.boardPieces, sourceSquareId, destinationSquareId, extraMovement)
-    }))
+    this.patchState(state => {
+      if (!boardPieces[sourceSquareId]) {
+        return {};
+      }
+
+      return {
+        movementsHistories: [
+          ...state.movementsHistories.slice(0, selectedMovementsHistoryIndex  +1),
+          {
+            type: MovementHistoryType.Move,
+            boardPieces: movePiece(boardPieces, sourceSquareId, destinationSquareId, extraMovement),
+            from: sourceSquareId,
+            to: destinationSquareId
+          }
+        ],
+        selectedMovementsHistoryIndex: null
+      }
+    })
+  }
+
+  public selectHistory(selectedMovementsHistoryIndex: number) {
+    this.patchState({ selectedMovementsHistoryIndex });
   }
   // endregion UPDATE
 }

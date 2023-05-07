@@ -5,8 +5,11 @@ import { ChessNumbersLabelDirective } from '../../directives/chess-numbers-label
 import { ChessLettersLabelDirective } from '../../directives/chess-letters-label.directive';
 import { BoardService, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
 import { SquareComponent } from '../square/square.component';
+import {MatExpansionModule} from '@angular/material/expansion';
+
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { ConfigService } from '../../../../../core/src/lib/config.service';
+import { HistoryComponent } from '../history/history.component';
 
 @Component({
   standalone: true,
@@ -16,7 +19,9 @@ import { ConfigService } from '../../../../../core/src/lib/config.service';
     ChessNumbersLabelDirective,
     ChessLettersLabelDirective,
     SquareComponent,
-    DragDropModule
+    DragDropModule,
+    HistoryComponent,
+    MatExpansionModule,
   ],
   selector: "chess-board",
   templateUrl: "./chess-board.component.html",
@@ -34,40 +39,46 @@ export class ChessBoardComponent {
 
   constructor() {
     this.configService.setSquareLength(this.squareLength);
+    this.addPieces().then();
+  }
 
-    this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'b1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'g1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Queen, 'd1');
-    this.boardService.addPiece(PieceColor.White, PieceType.King, 'e1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Rook, 'a1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Rook, 'h1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Bishop, 'c1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Bishop, 'f1');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'a2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'b2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'c2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'd2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'e2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'f2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'g2');
-    this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'h2');
+  private async addPieces() {
+    await this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'b1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Knight, 'g1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Queen, 'd1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.King, 'e1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Rook, 'a1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Rook, 'h1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Bishop, 'c1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Bishop, 'f1');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'a2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'b2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'c2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'd2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'e2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'f2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'g2');
+    await this.boardService.addPiece(PieceColor.White, PieceType.Pawn, 'h2');
 
-    this.boardService.addPiece(PieceColor.Black, PieceType.Knight, 'b8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Knight, 'g8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Queen, 'd8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.King, 'e8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Rook, 'a8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Rook, 'h8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Bishop, 'f8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Bishop, 'c8');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'a7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'b7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'c7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'd7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'e7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'f7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'g7');
-    this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'h7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Knight, 'b8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Knight, 'g8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Queen, 'd8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.King, 'e8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Rook, 'a8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Rook, 'h8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Bishop, 'f8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Bishop, 'c8');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'a7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'b7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'c7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'd7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'e7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'f7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'g7');
+    await this.boardService.addPiece(PieceColor.Black, PieceType.Pawn, 'h7');
+
+    this.boardService.startGame();
+
   }
 
   onDrop(e: CdkDragDrop<SquareId>) {

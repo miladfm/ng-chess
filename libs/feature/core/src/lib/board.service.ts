@@ -17,9 +17,13 @@ export class BoardService {
     this.store.isCheckmateByColor$(PieceColor.Black).subscribe(a => console.log('black checkmate', a));
   }
 
+  public startGame() {
+    this.store.startGame();
+  }
 
-  public addPiece(color: PieceColor, type: PieceType, startSquareId: SquareId) {
-    this.store.addPiece({type, color, startSquareId, hasMoved: false})
+
+  public async addPiece(color: PieceColor, type: PieceType, startSquareId: SquareId) {
+    await this.store.addPiece({type, color, startSquareId, hasMoved: false})
   }
 
 
