@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChessSquaresDirective } from '../../directives/chess-squares.directive';
 import { ChessNumbersLabelDirective } from '../../directives/chess-numbers-label.directive';
 import { ChessLettersLabelDirective } from '../../directives/chess-letters-label.directive';
-import { BoardService, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
+import { BoardService, PieceType, PieceColor, SquareId } from '@chess/core';
 import { SquareComponent } from '../square/square.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 
@@ -34,7 +34,6 @@ export class ChessBoardComponent {
   protected readonly squareLength = 8;
 
   private boardService = inject(BoardService);
-  private storeService = inject(StoreService);
   private configService = inject(ConfigService);
 
   constructor() {
@@ -81,8 +80,8 @@ export class ChessBoardComponent {
 
   }
 
-  onDrop(e: CdkDragDrop<SquareId>) {
+  async onDrop(e: CdkDragDrop<SquareId>) {
     this.boardService.resetSelection();
-    this.boardService.move(e.previousContainer.data, e.container.data);
+    await this.boardService.move(e.previousContainer.data, e.container.data);
   }
 }

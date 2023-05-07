@@ -39,11 +39,15 @@ $theme: mat.define-light-theme((
 
 html {
   background-color: #E5E5E5;
+  width: 100%;
+  height: 100%;
 }
 
-html, body {
-  margin: 56px;
-  padding: 0;
+body {
+  margin: 0;
+  padding: 24px;
+  width: 100%;
+  height: 100%;
 }
 
 * {

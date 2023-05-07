@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MovementHistoryType, StoreService } from '@chess/core';
-import { tap } from 'rxjs';
 
 @Component({
   selector: 'chess-history',
@@ -16,12 +15,12 @@ import { tap } from 'rxjs';
 export class HistoryComponent {
 
   private store = inject(StoreService);
-  protected history$ = this.store.pieceMovementsHistories$;
-  protected selectedMovementsHistoryIndex$ = this.store.selectedMovementsHistoryIndex$;
+  protected history$ = this.store.get.pieceMovementsHistories();
+  protected selectedMovementsHistoryIndex$ = this.store.get.selectedMovementsHistoryIndex();
 
   protected readonly MovementHistoryType = MovementHistoryType;
 
   protected onHistoryClick(index: number) {
-    this.store.selectHistory(index);
+    this.store.dispatch.selectHistory(index);
   }
 }

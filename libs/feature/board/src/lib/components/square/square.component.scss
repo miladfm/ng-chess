@@ -3,6 +3,11 @@
   justify-content: center;
   align-items: center;
   position: relative;
+  // Without this, the content of overlay, sometime will be visible outside of board.
+  // But if we hover the parent element or hover the element in chrome inspect panel,
+  // then the browser move the element inside of parent. WIRED :/
+  // This solution fix the chrome bug and the content of overlay will be always inside of parent element
+  overflow: hidden;
 }
 
 :host(.square--white) {

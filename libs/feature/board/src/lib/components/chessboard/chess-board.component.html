@@ -1,35 +1,39 @@
-<div
-  cdkDropListGroup
-  class='board'
-  [ngStyle]="{ '--square-length': squareLength }">
+<!--Wrap the board element to fix aspect-ratio base on width and height.-->
+<!--Without this solution elem overlay element will be bigger than parent height, -->
+<!--or it will be bigger than width of parent-->
+<div>
+  <div
+    cdkDropListGroup
+    class='board'
+    [ngStyle]="{ '--square-length': squareLength }">
 
-  <div class='labels--top'></div>
-  <div class='labels--right'></div>
+    <div class='labels--top'></div>
+    <div class='labels--right'></div>
 
-  <div class='labels--bottom labels--with-text'>
-    <div *chessLettersLabel='squareLength; let letter = letter' class="labels__text">{{letter}}</div>
+    <div class='labels--bottom labels--with-text'>
+      <div *chessLettersLabel='squareLength; let letter = letter' class="labels__text">{{letter}}</div>
+    </div>
+    <div class='labels--left labels--with-text'>
+      <div *chessNumberLabel='squareLength; let index = index' class="labels__text">{{index}}</div>
+    </div>
+
+    <div class='corner--top-left'></div>
+    <div class='corner--top-right'></div>
+    <div class='corner--bottom-left'></div>
+    <div class='corner--bottom-right'></div>
+
+    <chess-square
+      *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'
+      cdkDropList
+      [cdkDropListSortingDisabled]='true'
+      [cdkDropListData]='label'
+      (cdkDropListDropped)='onDrop($event)'
+      class='square'
+      [squareId]="label"
+      [isDarkSquare]="isDarkSquare">
+    </chess-square>
   </div>
-  <div class='labels--left labels--with-text'>
-    <div *chessNumberLabel='squareLength; let index = index' class="labels__text">{{index}}</div>
-  </div>
-
-  <div class='corner--top-left'></div>
-  <div class='corner--top-right'></div>
-  <div class='corner--bottom-left'></div>
-  <div class='corner--bottom-right'></div>
-
-  <chess-square
-    *chessSquares='squareLength; let label = label; let row = row; let col = col; let isDarkSquare = isDarkSquare'
-    cdkDropList
-    [cdkDropListSortingDisabled]='true'
-    [cdkDropListData]='label'
-    (cdkDropListDropped)='onDrop($event)'
-    class='square'
-    [squareId]="label"
-    [isDarkSquare]="isDarkSquare">
-  </chess-square>
 </div>
-
 
 <div class='sidebar'>
 

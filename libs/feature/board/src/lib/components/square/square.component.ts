@@ -38,11 +38,11 @@ export class SquareComponent implements OnInit {
   protected readonly Piece = PieceType;
 
   ngOnInit() {
-    this.pieceColor$ = this.store.pieceColorBySquareId$(this.squareId); // .pipe(tap(a => console.log('pieceColor$', a)));
-    this.pieceType$ = this.store.pieceTypeBySquareId$(this.squareId); // .pipe(tap(a => console.log('pieceType$', a)));
-    this.isSelected$ = this.store.isSquareSelectedBySquareId$(this.squareId); // .pipe(tap(a => console.log('isSelected', a)));
-    this.isAttackMove$ = this.store.isSquaresAttackMoveBySquareId$(this.squareId); // .pipe(tap(a => console.log('isAttackMove$', a)));
-    this.isFreeMove$ = this.store.isSquaresFreeMoveBySquareId$(this.squareId); // .pipe(tap(a => console.log('isFreeMove$', a)));
+    this.pieceColor$ = this.store.get.pieceColorBySquareId(this.squareId);
+    this.pieceType$ = this.store.get.pieceTypeBySquareId(this.squareId);
+    this.isSelected$ = this.store.get.isSquareSelectedBySquareId(this.squareId);
+    this.isAttackMove$ = this.store.get.isSquaresAttackMoveBySquareId(this.squareId);
+    this.isFreeMove$ = this.store.get.isSquaresFreeMoveBySquareId(this.squareId);
   }
 
 
