@@ -77,3 +77,15 @@ export interface PieceMovementsHistory {
 
 export type BoardPieces = Record<SquareId, Piece | null>;
 export type BoardMovements = Record<SquareId, PieceMovement[]>;
+
+
+export interface AiMove {
+  bestMove: {
+    from: SquareId,
+    to: SquareId
+  },
+  ponder?: {
+    from: SquareId,
+    to: SquareId
+  }
+}
