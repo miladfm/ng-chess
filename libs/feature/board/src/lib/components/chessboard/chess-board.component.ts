@@ -8,7 +8,6 @@ import { SquareComponent } from '../square/square.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
-import { ConfigService } from '../../../../../core/src/lib/config.service';
 import { HistoryComponent } from '../history/history.component';
 
 @Component({
@@ -34,10 +33,8 @@ export class ChessBoardComponent {
   protected readonly squareLength = 8;
 
   private boardService = inject(BoardService);
-  private configService = inject(ConfigService);
 
   constructor() {
-    this.configService.setSquareLength(this.squareLength);
     this.addPieces().then();
   }
 

@@ -1,15 +1,15 @@
 <div class='overlay'>
-  <div *ngIf='isSelected$ | async' class='overlay__selected'></div>
-  <div *ngIf='isFreeMove$ | async' class='overlay__movement--free'></div>
-  <div *ngIf='isAttackMove$ | async' class='overlay__movement--attack'></div>
+  <div *ngIf='isSelected()' class='overlay__selected'></div>
+  <div *ngIf='isFreeMove()' class='overlay__movement--free'></div>
+  <div *ngIf='isAttackMove()' class='overlay__movement--attack'></div>
 </div>
 
 <svg
   cdkDrag
-  [ngSwitch]='pieceType$ | async'
+  [ngSwitch]='pieceType()'
   class='piece'
-  [class.piece--white]='(pieceColor$ | async) === Player.White'
-  [class.piece--black]='(pieceColor$ | async) === Player.Black'
+  [class.piece--white]='pieceColor() === Player.White'
+  [class.piece--black]='pieceColor() === Player.Black'
   viewBox='0 0 45 45'>
 
   <!-- Pawn -->

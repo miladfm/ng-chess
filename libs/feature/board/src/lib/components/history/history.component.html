@@ -1,8 +1,8 @@
 <div
-  *ngFor="let history of history$ | async"
+  *ngFor="let history of history()"
   [ngSwitch]='history.type'
   class="history__entry"
-  [class.history__entry--selected]='(selectedMovementsHistoryIndex$ | async) === history.index'
+  [class.history__entry--selected]='selectedMovementsHistoryIndex() === history.index'
   (click)='onHistoryClick(history.index)'>
 
   <span *ngSwitchCase='MovementHistoryType.StartGame'>

@@ -1,8 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component, effect,
+  inject,
+  Injector,
+  Input,
+  OnInit,
+  runInInjectionContext, Signal,
+  ViewEncapsulation,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import { BoardService, PieceType, PieceColor, SquareId, StoreService } from '@chess/core';
-import { Observable, tap } from 'rxjs';
+import { BoardService, PieceType, PieceColor, SquareId } from '@chess/core';
+import { StoreSelector } from '../../../../../core/src/lib/signal-store/store.selector';
 
 @Component({
   selector: 'chess-square',
@@ -24,25 +33,29 @@ export class SquareComponent implements OnInit {
   @Input() isDarkSquare: boolean;
   @Input() squareId: SquareId;
 
-  protected store = inject(StoreService);
+  protected selector = inject(StoreSelector);
   protected board = inject(BoardService);
+  protected injector = inject(Injector);
 
-  protected pieceColor$: Observable<PieceColor| undefined>;
-  protected pieceType$: Observable<PieceType| undefined>;
-  protected isSelected$: Observable<boolean>;
-  protected isAttackMove$: Observable<boolean>;
-  protected isFreeMove$: Observable<boolean>;
+  protected pieceColor: Signal<PieceColor| undefined>;
+  protected pieceType: Signal<PieceType| undefined>;
+  protected isSelected: Signal<boolean>;
+  protected isAttackMove: Signal<boolean>;
+  protected isFreeMove: Signal<boolean>;
 
 
   protected readonly Player = PieceColor;
   protected readonly Piece = PieceType;
 
+
   ngOnInit() {
-    this.pieceColor$ = this.store.get.pieceColorBySquareId(this.squareId);
-    this.pieceType$ = this.store.get.pieceTypeBySquareId(this.squareId);
-    this.isSelected$ = this.store.get.isSquareSelectedBySquareId(this.squareId);
-    this.isAttackMove$ = this.store.get.isSquaresAttackMoveBySquareId(this.squareId);
-    this.isFreeMove$ = this.store.get.isSquaresFreeMoveBySquareId(this.squareId);
+    runInInjectionContext(this.injector, () => {
+      this.pieceColor = this.selector.pieceColorBySquareId(this.squareId);
+      this.pieceType = this.selector.pieceTypeBySquareId(this.squareId);
+      this.isSelected = this.selector.isSquareSelectedBySquareId(this.squareId);
+      this.isAttackMove = this.selector.isSquaresAttackMoveBySquareId(this.squareId);
+      this.isFreeMove = this.selector.isSquaresFreeMoveBySquareId(this.squareId);
+    });
   }
 
 

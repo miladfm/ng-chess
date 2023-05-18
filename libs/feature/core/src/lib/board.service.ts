@@ -1,23 +1,29 @@
-import { inject, Injectable } from '@angular/core';
+import { effect, inject, Injectable } from '@angular/core';
 import { PieceColor, PieceType, SquareId } from './types';
-import { StoreService } from './store.service';
-import { aiMove } from './ai-move';
-import { combineLatestWith, distinctUntilChanged, filter, switchMap, take, tap, withLatestFrom } from 'rxjs';
-import { MovementHistoryType } from './store/store.model';
+import { StoreAction } from './signal-store/store.action';
+import { StoreSelector } from './signal-store/store.selector';
 
-let activeColor = PieceColor.White;
 
 @Injectable({providedIn: 'root'})
 export class BoardService {
 
-  private store = inject(StoreService);
+  private signalAction = inject(StoreAction);
+  private signalSelector = inject(StoreSelector);
 
   constructor() {
-    this.store.get.isKingCheckSquareIdByColor(PieceColor.White).subscribe(a => console.log('white check', a));
-    this.store.get.isKingCheckSquareIdByColor(PieceColor.Black).subscribe(a => console.log('black check', a));
 
-    this.store.get.isCheckmateByColor(PieceColor.White).subscribe(a => console.log('white checkmate', a));
-    this.store.get.isCheckmateByColor(PieceColor.Black).subscribe(a => console.log('black checkmate', a));
+    const isWhiteKingCheck = this.signalSelector.isKingCheckSquareIdByColor(PieceColor.White);
+    const isBlackKingCheck = this.signalSelector.isKingCheckSquareIdByColor(PieceColor.Black);
+    const isWhiteKingCheckmate = this.signalSelector.isCheckmateByColor(PieceColor.White);
+    const isBlackKingCheckmate = this.signalSelector.isCheckmateByColor(PieceColor.Black);
+
+    effect(() => console.log('[signal] white check', isWhiteKingCheck()))
+    effect(() => console.log('[signal] black check', isBlackKingCheck()))
+    effect(() => console.log('[signal] white checkmate', isWhiteKingCheckmate()))
+    effect(() => console.log('[signal] black checkmate', isBlackKingCheckmate()))
+
+
+
 
 
     // this.store.get.pieceMovementsHistories().pipe(
@@ -35,50 +41,50 @@ export class BoardService {
   }
 
   public startGame() {
-    this.store.dispatch.startGame();
+    this.signalAction.startGame();
   }
 
 
   public async addPiece(color: PieceColor, type: PieceType, startSquareId: SquareId) {
-    await this.store.dispatch.addPiece({type, color, startSquareId, hasMoved: false})
+    const piece = {type, color, startSquareId, hasMoved: false};
+    this.signalAction.addPiece(piece);
   }
 
 
-  public async move(start: SquareId, end: SquareId) {
+  public move(start: SquareId, end: SquareId) {
 
-    const movements = await this.store.snapshots.pieceMovementsBySquareId(start);
-    const canMove = movements.some(movement => movement.squareId === end)
+    const signalMovements = this.signalSelector.pieceMovementsBySquareId(start)();
+    const signalCanMove = signalMovements.some(movement => movement.squareId === end)
 
-    if (canMove) {
-      await this.store.dispatch.replacePiece(start, end);
+    if (signalCanMove) {
+      this.signalAction.replacePiece(start, end);
     }
   }
 
   public resetSelection() {
-    this.store.dispatch.resetSelection();
+    this.signalAction.resetSelection();
   }
 
-  public async selectSquare(squareId: SquareId) {
-
-    const selectedSquareId = await this.store.snapshots.selectedSquareId();
+  public selectSquare(squareId: SquareId) {
+    const signalSelectedSquareId = this.signalSelector.selectedSquareId();
 
     // deselect the selected square
-    if (selectedSquareId === squareId) {
-      this.store.dispatch.resetSelection();
+    if (signalSelectedSquareId === squareId) {
+      this.signalAction.resetSelection();
       return;
     }
 
-    const selectedSquareMovements = await this.store.snapshots.selectedSquareMovements();
-    const shouldMove = selectedSquareMovements.some(movement => movement.squareId === squareId);
+    const signalSelectedSquareMovements = this.signalSelector.selectedSquareMovements();
+    const signalShouldMove = signalSelectedSquareMovements.some(movement => movement.squareId === squareId);
 
     // Move selected piece
-    if (selectedSquareId && shouldMove) {
-      await this.move(selectedSquareId, squareId);
-      this.store.dispatch.resetSelection();
+    if (signalSelectedSquareId && signalShouldMove) {
+      this.move(signalSelectedSquareId, squareId);
+      this.signalAction.resetSelection();
       return;
     }
 
     // Select square
-    this.store.dispatch.selectSquare(squareId);
+    this.signalAction.selectSquare(squareId);
   }
 }

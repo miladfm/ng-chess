@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MovementHistoryType, StoreService } from '@chess/core';
+import { MovementHistoryType } from '@chess/core';
+import { StoreSelector } from '../../../../../core/src/lib/signal-store/store.selector';
+import { StoreAction } from '../../../../../core/src/lib/signal-store/store.action';
 
 @Component({
   selector: 'chess-history',
@@ -14,13 +16,14 @@ import { MovementHistoryType, StoreService } from '@chess/core';
 })
 export class HistoryComponent {
 
-  private store = inject(StoreService);
-  protected history$ = this.store.get.pieceMovementsHistories();
-  protected selectedMovementsHistoryIndex$ = this.store.get.selectedMovementsHistoryIndex();
+  private storeAction = inject(StoreAction);
+
+  protected history = inject(StoreSelector).pieceMovementsHistories;
+  protected selectedMovementsHistoryIndex = inject(StoreSelector).selectedMovementsHistoryIndex;
 
   protected readonly MovementHistoryType = MovementHistoryType;
 
   protected onHistoryClick(index: number) {
-    this.store.dispatch.selectHistory(index);
+    this.storeAction.selectHistory(index);
   }
 }
